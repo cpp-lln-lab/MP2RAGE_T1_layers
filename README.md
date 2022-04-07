@@ -1,13 +1,8 @@
 [![made-with-datalad](https://www.datalad.org/badges/made_with.svg)](https://datalad.org)
 
-# Project <insert name>
+# Project MP2RAGE_T1_layers
 
-This repo is made with
-[cpp-lln-lab/template_datalad_fMRI](https://github.com/cpp-lln-lab/template_datalad_fMRI).
-
-[⚠️ CHECK THE GUIDE ON HOW TO USE IT ⚠️](./how-to-use-me.md)
-
-## Add below documentation regarding this project
+This is the YODA dataset for estimating T1 laminar profiles from MP2RAGE images.
 
 ## DataLad datasets and how to use them
 
