@@ -10,3 +10,8 @@
 	path = inputs/bidsNighres
 	url = git@gin.g-node.org:/cpp_brewery/analysis_V5_high-res_pilot_nighres.git
 	datalad-id = 0168c8a1-949c-4f06-885f-0fa72925cedc
+[submodule "inputs/cpp_spm-preproc"]
+	path = inputs/cpp_spm-preproc
+	url = git@gin.g-node.org:/marcobarilari/analysis_high-res_MP2RAGE-layers_derivatives_cpp_spm-preproc.git
+	datalad-id = d39b0b30-153b-4595-936a-6771f67310f0
+	datalad-url = git@gin.g-node.org:/marcobarilari/analysis_high-res_MP2RAGE-layers_derivatives_cpp_spm-preproc.git
