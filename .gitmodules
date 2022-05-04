@@ -15,3 +15,8 @@
 	url = git@gin.g-node.org:/marcobarilari/analysis_high-res_MP2RAGE-layers_derivatives_cpp_spm-preproc.git
 	datalad-id = d39b0b30-153b-4595-936a-6771f67310f0
 	datalad-url = git@gin.g-node.org:/marcobarilari/analysis_high-res_MP2RAGE-layers_derivatives_cpp_spm-preproc.git
+[submodule "inputs/laynii-layers"]
+	path = inputs/laynii-layers
+	url = git@gin.g-node.org:/marcobarilari/analysis_high-res_MP2RAGE-layers_derivatives_laynii.git
+	datalad-id = 53cd3d3e-d2fa-4054-bb69-07869f683d6a
+	datalad-url = git@gin.g-node.org:/marcobarilari/analysis_high-res_MP2RAGE-layers_derivatives_laynii.git
