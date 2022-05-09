@@ -2,18 +2,20 @@
 
 ## Analyses steps
 
-0. Assuming that `T1map`, `MP2RAGE segmentation` and `Layers` grown on the MP2RAGE are already processed in `inputs/bidsNighres`. We will require upsampling the MP2RAGE resolution from 0.75 mm to eg 0.4 mm [WIP]
+1. UNIT1, deformation field and layers (`*6layer_mask_layers_equidist.nii.gz*`) copied manually (`copy -L path/to/file path/to/folder`) to the derivatives folder, for each subject.
 
-1. SPM anatomical segmentation and deformation field for normalisation via `bidsSegmentSkullStrip.m`
+2. Run `creation_V1mask.m`. The next steps are completed within this script:
 
-2. Define V1 ROI from atlas in MNI space
+    1. Define V1 ROI from atlas in MNI space using `bidsCreateRois.m` and converted to individual space
+        - Default atlas is `Wang`. Four partial masks (left and right, dorsal and ventral) are created in MNI space; 
+        - Partial masks are converted to individual space.
 
-3. Apply ROIs in MNI space to individual space
+    2. Partial ROIs are merged using `mergeMasks.m`.
 
-4. Put together ROI and layers and create single masks
+3. Put together ROI and layers and create single masks.
 
-5. Extract T1 relaxation from `T1map` from each mask and save in a `tsv`
+4. Extract T1 relaxation from `T1map` from each mask and save in a `tsv` using `spm_summarize.m`
 
-6. Repeat in each subject
+5. Repeat in each subject.
 
-7. Plot relaxation profiles in the layers
+6. Plot relaxation profiles in the layers.
