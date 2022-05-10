@@ -19,3 +19,15 @@
 5. Repeat in each subject.
 
 6. Plot relaxation profiles in the layers.
+
+## Log of steps
+
+3. Put together ROI and layers and create single masks.
+
+working on sub-pilot005:
+
+    1. create insterception of v1 mask and layers
+
+    2. Create 1 mask per layer
+
+4. Extract T1 relaxation from `T1map` from each mask and save in a `tsv` using `spm_summarize.m`
