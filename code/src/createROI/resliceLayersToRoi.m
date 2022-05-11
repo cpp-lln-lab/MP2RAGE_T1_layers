@@ -32,8 +32,7 @@ for subIdx = 1:numel(opt.subjects)
 
     ref = bids.query(BIDSref, 'data', filter);
 
-    % should have one image only
-    assert(numel(ref) == 1);
+    % should have one image onl    assert(numel(ref) == 1);
 
     %% get source images to reslice
     clear filter;

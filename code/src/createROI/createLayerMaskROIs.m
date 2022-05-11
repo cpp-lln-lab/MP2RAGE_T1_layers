@@ -8,7 +8,7 @@ run ../initEnv();
 
 opt = get_option_rois();
 
-opt.subjects = {'pilot005'};
+opt.subjects = {'pilot004'};
 
 opt.dir.roi = opt.dir.output;
 
@@ -17,7 +17,7 @@ BIDS = bids.layout(opt.dir.roi, 'use_schema', false);
 for subIdx = 1:numel(opt.subjects)
 
   %% get images
-
+  fprintf('subject number: %d\n', subIdx);
   subLabel = opt.subjects{subIdx};
 
   filter.sub = subLabel;
@@ -37,7 +37,7 @@ for subIdx = 1:numel(opt.subjects)
     
   layer_file = bids.query(BIDS, 'data', filter);
   layer_file = layer_file{1};
-
+  clear filter
   %% restricts the layer segmentation image to only include voxels from the ROI
 
   hdr = spm_vol(V1_file);
