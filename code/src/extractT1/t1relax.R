@@ -8,18 +8,24 @@ library(gridExtra)
 
 
 
-path <- '~/Desktop'
+path <- '~/Desktop/Data/MP2RAGE_T1_layers/outputs/derivatives/cpp_spm-roi'
 
 # load the tsv file per each subject
-pilot001 <- read.table(paste(path, 'sub-pilot001_ses-001_acq-r0p375_T1relaxation.tsv', sep = '/'),
+pilot001 <- read.table(paste(path, 
+                             'sub-pilot001/ses-001/anat', 
+                             'sub-pilot001_ses-001_acq-r0p375_label-V1_desc-T1relaxation.tsv', sep = '/'),
                        header = T,
                        na.strings = 'NaN')
 
-pilot004 <- read.table(paste(path, 'sub-pilot004_ses-001_acq-r0p375_T1relaxation.tsv', sep = '/'),
+pilot004 <- read.table(paste(path, 
+                             'sub-pilot004/ses-001/anat', 
+                             'sub-pilot004_ses-001_acq-r0p375_label-V1_T1relaxation.tsv', sep = '/'),
                        header = T,
                        na.strings = 'NaN')
 
-pilot005 <- read.table(paste(path, 'sub-pilot005_ses-001_acq-r0p375_T1relaxation.tsv', sep = '/'),
+pilot005 <- read.table(paste(path, 
+                             'sub-pilot005/ses-001/anat',
+                             'sub-pilot005_ses-001_acq-r0p375_label-V1_T1relaxation.tsv', sep = '/'),
                        header = T,
                        na.strings = 'NaN')
 

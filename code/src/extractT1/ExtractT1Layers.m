@@ -2,10 +2,10 @@ clear;
 clc;
 
 run ../initEnv();
-
+addpath('/home/marcianunes/Desktop/Data/MP2RAGE_T1_layers/code/src/createROI');
 opt = get_option_rois();
 
-opt.subjects = {'pilot004'};
+opt.subjects = {'pilot001', 'pilot004','pilot005'};
 
 opt.dir.roi = opt.dir.output;
 
@@ -19,11 +19,12 @@ for subIdx = 1:numel(opt.subjects)
   fprintf('subject number: %d\n', subIdx);
   filter.sub = subLabel;
   filter.suffix = 'mask';
-  
-  filter.label = {'V1layer1', 'V1layer2', 'V1layer3', 'V1layer4', 'V1layer5', 'V1layer6'};
-  filter.desc = 'wang';
+  %filter.label = {'pFuslayer1', 'pFuslayer2', 'pFuslayer3', 'pFuslayer4', 'pFuslayer5', 'pFuslayer6'};
+  %filter.label = {'CoSlayer1', 'CoSlayer2', 'CoSlayer3', 'CoSlayer4', 'CoSlayer5', 'CoSlayer6'};
+  filter.label = {'mFuslayer1', 'mFuslayer2', 'mFuslayer3', 'mFuslayer4', 'mFuslayer5', 'mFuslayer6'};
+  filter.desc = 'visfAtlas';
   filter.modality = 'roi';
-
+  filter.hemi='R';
   listoflayers = bids.query(BIDS, 'data', filter);
 
   clear filter
@@ -32,6 +33,7 @@ for subIdx = 1:numel(opt.subjects)
   filter.sub = subLabel;
   %filter.prefix = 'r';
   filter.suffix = 'T1map';
+  filter.acq = 'r0p375';
     
   T1map = bids.query(BIDS, 'data', filter);
   T1map = T1map{1};
@@ -60,7 +62,7 @@ for subIdx = 1:numel(opt.subjects)
   end
   
   outputName = [ 'sub-' subLabel ...
-                 '_ses-001_acq-r0p375_T1relaxation.tsv'];
+                 '_ses-001_acq-r0p375_hemi-R_label-mFus_desc-T1relaxation.tsv'];
         
   fileName = fullfile(opt.dir.output, ['sub-' subLabel] , 'ses-001', 'anat', outputName);
   

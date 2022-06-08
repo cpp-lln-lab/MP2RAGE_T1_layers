@@ -8,7 +8,7 @@ function opt = get_option_rois()
     end
     
 
-    opt.subjects = {'pilot004'};
+    opt.subjects = {'pilot005'};
     
     opt.query.modality = 'anat';
     opt.query.ses = '001';
@@ -27,8 +27,8 @@ function opt = get_option_rois()
     opt.anatOnly = 'true';
     
     opt.bidsFilterFile.t1w.suffix = 'UNIT1';
-    opt.roi.atlas = 'wang';
-    opt.roi.name = {'V1v', 'V1d'};
+    opt.roi.atlas = 'visfAtlas';
+    opt.roi.name = {'pFus', 'mFus', 'CoS'};
     opt.roi.space = {'IXI549Space', 'individual'};
     %opt.dir.stats = fullfile(opt.dir.raw, '..', 'derivatives', 'cpp_spm-stats');
 

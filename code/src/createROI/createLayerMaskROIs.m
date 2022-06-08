@@ -8,7 +8,7 @@ run ../initEnv();
 
 opt = get_option_rois();
 
-opt.subjects = {'pilot004'};
+opt.subjects = {'pilot001', 'pilot004', 'pilot005'};
 
 opt.dir.roi = opt.dir.output;
 
@@ -22,9 +22,10 @@ for subIdx = 1:numel(opt.subjects)
 
   filter.sub = subLabel;
   filter.suffix = 'mask';
-  filter.label = 'V1';
-  filter.desc = 'wang';
+  filter.label = 'mFus'; %, 'pFus', 'CoS', 'mFus'};
+  filter.desc = 'visfAtlas';
   filter.modality = 'roi';
+  filter.hemi = 'L';
 
   V1_file = bids.query(BIDS, 'data', filter);
   V1_file = V1_file{1};
@@ -50,7 +51,7 @@ for subIdx = 1:numel(opt.subjects)
   V1_layers(find(V1_mask)) = layer_seg(find(V1_mask)); %#ok<*FNDSB>
 
   bf = bids.File(V1_file);
-  bf.entities.label = 'V16layers';
+  bf.entities.label = 'mFus6layers'; %%, 'pFus', 'CoS', 'mFus'};
   Vone_layers_file = fullfile(spm_fileparts(hdr.fname), bf.filename);
   hdr.fname = Vone_layers_file;
   spm_write_vol(hdr, V1_layers);
@@ -73,7 +74,7 @@ for subIdx = 1:numel(opt.subjects)
   for i = 1:numel(labelStruct)
     thissLabelStruct = labelStruct(i);
 
-    thissLabelStruct.ROI = ['V1', labelStruct(i).ROI];
+    thissLabelStruct.ROI = ['mFus', labelStruct(i).ROI]; %%, 'pFus', 'CoS', 'mFus'};
     output = extractRoiByLabel(Vone_layers_file, thissLabelStruct);
 
   end

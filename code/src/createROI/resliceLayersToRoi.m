@@ -26,8 +26,8 @@ for subIdx = 1:numel(opt.subjects)
 
     filter.sub = subLabel;
     filter.suffix = 'mask';
-    filter.label = 'V1';
-    filter.desc = 'wang';
+    filter.label = {'pFus', 'mFus', 'CoS'};
+    filter.desc = 'visfAtlas';
     filter.modality = 'roi';
 
     ref = bids.query(BIDSref, 'data', filter);
