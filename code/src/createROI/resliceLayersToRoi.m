@@ -47,14 +47,14 @@ for subIdx = 1:numel(opt.subjects)
 
     clear filter;
 
-%     filter.sub = subLabel;
-%     filter.suffix = 'mask';
-%     filter.prefix = '';
-%     filter.extension = '.nii';
-% 
-%     masks = bids.query(BIDSsrc, 'data', filter);
+    %     filter.sub = subLabel;
+    %     filter.suffix = 'mask';
+    %     filter.prefix = '';
+    %     filter.extension = '.nii';
+    %
+    %     masks = bids.query(BIDSsrc, 'data', filter);
 
-%     src = cat(1, layers, masks);
+    %     src = cat(1, layers, masks);
 
     %% reslice with nearest neighbour interpolation
     interpolation = 0;

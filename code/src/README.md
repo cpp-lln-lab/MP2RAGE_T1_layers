@@ -11,7 +11,7 @@ Done for sub-pilot004 and sub-pilot005 (no layers for sub-pilot001 yet):
 2. Run `creation_V1mask.m`. The next steps are completed within this script:
 
     1. Define V1 ROI from atlas in MNI space using `bidsCreateRois.m` and converted to individual space
-        - Default atlas is `Wang`. Four partial masks (left and right, dorsal and ventral) are created in MNI space; 
+        - Default atlas is `Wang`. Four partial masks (left and right, dorsal and ventral) are created in MNI space;
         - Partial masks are converted to individual space.
 
     2. Partial ROIs are merged using `mergeMasks.m`.
@@ -22,7 +22,7 @@ Changes made to `outputs/derivatives/cpp_spm-roi/sub-'SubLabel'`
 - `sub-'SubLabel'/ses-001/roi` renamed to `sub-'SubLabel'/ses-001/anat`
 - `sub-'SubLabel'/roi` moved to `sub-'SubLabel'/ses-001/anat`
 - outputs of `bidsCreateRoi.m` renamed manually accordingly to BIDS format (Informaion about the session was missing, `ses-001` added to the filename).
-- outputs of `mergeMasks.m` renamed manually 
+- outputs of `mergeMasks.m` renamed manually
 - Layers file moved to `sub-'SubLabel'/ses-001/roi`
 
 Done for SubLabel= {pilot005}
@@ -50,6 +50,3 @@ working on sub-pilot005:
 
 
     2. Create 1 mask per layer
-
-
-

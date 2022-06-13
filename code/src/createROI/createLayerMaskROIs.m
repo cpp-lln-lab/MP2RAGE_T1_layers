@@ -16,68 +16,67 @@ BIDS = bids.layout(opt.dir.roi, 'use_schema', false);
 
 for subIdx = 1:numel(opt.subjects)
 
-  %% get images
-  fprintf('subject number: %d\n', subIdx);
-  subLabel = opt.subjects{subIdx};
+    %% get images
+    fprintf('subject number: %d\n', subIdx);
+    subLabel = opt.subjects{subIdx};
 
-  filter.sub = subLabel;
-  filter.suffix = 'mask';
-  filter.label = 'mFus'; %, 'pFus', 'CoS', 'mFus'};
-  filter.desc = 'visfAtlas';
-  filter.modality = 'roi';
-  filter.hemi = 'L';
+    filter.sub = subLabel;
+    filter.suffix = 'mask';
+    filter.label = 'mFus'; % , 'pFus', 'CoS', 'mFus'};
+    filter.desc = 'visfAtlas';
+    filter.modality = 'roi';
+    filter.hemi = 'L';
 
-  V1_file = bids.query(BIDS, 'data', filter);
-  V1_file = V1_file{1};
+    V1_file = bids.query(BIDS, 'data', filter);
+    V1_file = V1_file{1};
 
-  clear filter
+    clear filter;
 
-  filter.sub = subLabel;
-  filter.prefix = 'r';
-  filter.label = '6layerEquidist';
-    
-  layer_file = bids.query(BIDS, 'data', filter);
-  layer_file = layer_file{1};
-  clear filter
-  %% restricts the layer segmentation image to only include voxels from the ROI
+    filter.sub = subLabel;
+    filter.prefix = 'r';
+    filter.label = '6layerEquidist';
 
-  hdr = spm_vol(V1_file);
+    layer_file = bids.query(BIDS, 'data', filter);
+    layer_file = layer_file{1};
+    clear filter;
+    %% restricts the layer segmentation image to only include voxels from the ROI
 
-  layer_seg = spm_read_vols(spm_vol(layer_file));
+    hdr = spm_vol(V1_file);
 
-  % Intersaction V1 and layers
-  V1_mask = spm_read_vols(spm_vol(V1_file));
-  V1_layers = zeros(size(V1_mask));
-  V1_layers(find(V1_mask)) = layer_seg(find(V1_mask)); %#ok<*FNDSB>
+    layer_seg = spm_read_vols(spm_vol(layer_file));
 
-  bf = bids.File(V1_file);
-  bf.entities.label = 'mFus6layers'; %%, 'pFus', 'CoS', 'mFus'};
-  Vone_layers_file = fullfile(spm_fileparts(hdr.fname), bf.filename);
-  hdr.fname = Vone_layers_file;
-  spm_write_vol(hdr, V1_layers);
+    % Intersaction V1 and layers
+    V1_mask = spm_read_vols(spm_vol(V1_file));
+    V1_layers = zeros(size(V1_mask));
+    V1_layers(find(V1_mask)) = layer_seg(find(V1_mask)); %#ok<*FNDSB>
 
-  %% creates one binary mask per layer / ROI
+    bf = bids.File(V1_file);
+    bf.entities.label = 'mFus6layers'; %% , 'pFus', 'CoS', 'mFus'};
+    Vone_layers_file = fullfile(spm_fileparts(hdr.fname), bf.filename);
+    hdr.fname = Vone_layers_file;
+    spm_write_vol(hdr, V1_layers);
 
-  labelStruct(1).ROI = 'layer1';
-  labelStruct(1).label = 1;
-  labelStruct(2).ROI = 'layer2';
-  labelStruct(2).label = 2;
-  labelStruct(3).ROI = 'layer3';
-  labelStruct(3).label = 3;
-  labelStruct(4).ROI = 'layer4';
-  labelStruct(4).label = 4;
-  labelStruct(5).ROI = 'layer5';
-  labelStruct(5).label = 5;
-  labelStruct(6).ROI = 'layer6';
-  labelStruct(6).label = 6;
+    %% creates one binary mask per layer / ROI
 
-  for i = 1:numel(labelStruct)
-    thissLabelStruct = labelStruct(i);
+    labelStruct(1).ROI = 'layer1';
+    labelStruct(1).label = 1;
+    labelStruct(2).ROI = 'layer2';
+    labelStruct(2).label = 2;
+    labelStruct(3).ROI = 'layer3';
+    labelStruct(3).label = 3;
+    labelStruct(4).ROI = 'layer4';
+    labelStruct(4).label = 4;
+    labelStruct(5).ROI = 'layer5';
+    labelStruct(5).label = 5;
+    labelStruct(6).ROI = 'layer6';
+    labelStruct(6).label = 6;
 
-    thissLabelStruct.ROI = ['mFus', labelStruct(i).ROI]; %%, 'pFus', 'CoS', 'mFus'};
-    output = extractRoiByLabel(Vone_layers_file, thissLabelStruct);
+    for i = 1:numel(labelStruct)
+        thissLabelStruct = labelStruct(i);
 
-  end
+        thissLabelStruct.ROI = ['mFus', labelStruct(i).ROI]; %% , 'pFus', 'CoS', 'mFus'};
+        output = extractRoiByLabel(Vone_layers_file, thissLabelStruct);
 
+    end
 
 end
