@@ -1,22 +1,21 @@
-# MP2RAGE T1 realxation in the layers
+# MP2RAGE T1 relaxation in the layers
 
 ## Analyses steps
 0. Create sibling for `MP2RAGE_T1_layers` because we could not do 'datalad get' in `inputs/bidsNighRes`. Issue to be fixed in the future.
+
 Done for sub-pilot001, sub-pilot004 and sub-pilot005:
+
 1. UNIT1, deformation field and layers copied manually (running in the terminal `copy -L path/to/file path/to/folder`) to the derivatives folder, for each subject:
     - UNIT1 (`*desc-skullstripped_space-individual_UNIT1.nii`) and deformation field (`*from-IXI549Space_to-UNIT1*`) copied from `inputs/cpp_spm-preproc/sub-'subLabel'/ses-001` to `outputs/derivatives/cpp_spm-roi/sub-subLabel/ses-001/ROI`
+
 Done for sub-pilot004 and sub-pilot005 (no layers for sub-pilot001 yet):
+
     - Layers file (`*6layer_mask_layers_equidist.nii.gz*`) copied from `inputs/laynii-layers/sub-'subLabel'/ses-001/layers` to `outputs/derivatives/cpp_spm-roi/sub-'subLabel'/ses-001/ROI`
     - T1 map copied manually from `temptodelete/MP2RAGE_T1_layers/inputs/bidsNighRes/sub-'subLabel'/ses-001/anat` to `outputs/derivatives/cpp_spm-roi/sub-'subLabel'/ses-001/anat`
-2. Run `creation_V1mask.m`. The next steps are completed within this script:
 
-    1. Define V1 ROI from atlas in MNI space using `bidsCreateRois.m` and converted to individual space
-        - Default atlas is `Wang`. Four partial masks (left and right, dorsal and ventral) are created in MNI space; 
-        - Partial masks are converted to individual space.
+2. Run `creation_V1mask.m`.
 
-    2. Partial ROIs are merged using `mergeMasks.m`.
-
-Done for SubLabel= {pilot001, pilot004, pilot005}
+Done for SubLabel= {pilot001, pilot004, pilot005}.
 Changes made to `outputs/derivatives/cpp_spm-roi/sub-'SubLabel'`
 - `sub-'SubLabel'/ses-001/ROI` changed to `sub-'SubLabel'/ses-001/roi`
 - `sub-'SubLabel'/ses-001/roi` renamed to `sub-'SubLabel'/ses-001/anat`
@@ -36,10 +35,21 @@ Done for SubLabel= {pilot005}
 
 6. Plot relaxation profiles in the layers.
 
-5. Repeat for SubLabel= {pilot001, pilot004}
+5. Repeat for SubLabel= {pilot001, pilot004}.
+
+6. Repeat everything from step 2. for visfAtlas ROIs: pFus, mFus and CoS.
 
 
 ## Log of steps
+2. Run `creation_V1mask.m`. The next steps are completed within this script:
+
+    1. Define V1 ROI from atlas in MNI space using `bidsCreateRois.m` and converted to individual space
+        - Default atlas is `Wang`. Four partial masks (left and right, dorsal and ventral) are created in MNI space; 
+        - Partial masks are converted to individual space.
+
+    2. Partial ROIs are merged using `mergeMasks.m`.
+
+- Issue submitted on Github to fix bidsCreateROIs.m output format.
 
 3. Put together ROI and layers and create single masks.
 
