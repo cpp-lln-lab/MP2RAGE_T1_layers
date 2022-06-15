@@ -19,12 +19,15 @@ for subIdx = 1:numel(opt.subjects)
   fprintf('subject number: %d\n', subIdx);
   filter.sub = subLabel;
   filter.suffix = 'mask';
-  %filter.label = {'pFuslayer1', 'pFuslayer2', 'pFuslayer3', 'pFuslayer4', 'pFuslayer5', 'pFuslayer6'};
-  %filter.label = {'CoSlayer1', 'CoSlayer2', 'CoSlayer3', 'CoSlayer4', 'CoSlayer5', 'CoSlayer6'};
-  filter.label = {'mFuslayer1', 'mFuslayer2', 'mFuslayer3', 'mFuslayer4', 'mFuslayer5', 'mFuslayer6'};
-  filter.desc = 'visfAtlas';
-  filter.modality = 'roi';
-  filter.hemi='R';
+  filter.label = {'V1dlayer1', 'V1dlayer2', 'V1dlayer3', 'V1dlayer4', 'V1dlayer5', 'V1dlayer6'};
+%  {'pFuslayer1', 'pFuslayer2', 'pFuslayer3', 'pFuslayer4', 'pFuslayer5', 'pFuslayer6'};
+%       'CoSlayer1', 'CoSlayer2', 'CoSlayer3', 'CoSlayer4', 'CoSlayer5', 'CoSlayer6', ...
+%       'mFuslayer1', 'mFuslayer2', 'mFuslayer3', 'mFuslayer4', 'mFuslayer5', 'mFuslayer6', ...
+%       'V1layer1', 'V1layer2', 'V1layer3', 'V1layer4', 'V1layer5', 'V1layer6'};
+  filter.atlas = {'wang', 'visfAtlas'};
+%   filter.modality = 'roi';
+  filter.space = 'individual';
+  filter.hemi='L';
   listoflayers = bids.query(BIDS, 'data', filter);
 
   clear filter
@@ -62,7 +65,7 @@ for subIdx = 1:numel(opt.subjects)
   end
   
   outputName = [ 'sub-' subLabel ...
-                 '_ses-001_acq-r0p375_hemi-R_label-mFus_desc-T1relaxation.tsv'];
+                 '_ses-001_acq-r0p375_hemi-L_label-V1d_desc-T1relaxation.tsv'];
         
   fileName = fullfile(opt.dir.output, ['sub-' subLabel] , 'ses-001', 'anat', outputName);
   

@@ -27,8 +27,8 @@ function opt = get_option_rois()
     opt.anatOnly = 'true';
     
     opt.bidsFilterFile.t1w.suffix = 'UNIT1';
-    opt.roi.atlas = 'visfAtlas';
-    opt.roi.name = {'pFus', 'mFus', 'CoS'};
+    opt.roi.atlas = 'wang';
+    opt.roi.name = {'V1d', 'V1v'};
     opt.roi.space = {'IXI549Space', 'individual'};
     %opt.dir.stats = fullfile(opt.dir.raw, '..', 'derivatives', 'cpp_spm-stats');
 
