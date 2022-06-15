@@ -20,3 +20,8 @@
 	url = git@gin.g-node.org:/marcobarilari/analysis_high-res_MP2RAGE-layers_derivatives_laynii.git
 	datalad-id = 53cd3d3e-d2fa-4054-bb69-07869f683d6a
 	datalad-url = git@gin.g-node.org:/marcobarilari/analysis_high-res_MP2RAGE-layers_derivatives_laynii.git
+[submodule "inputs/raw"]
+	path = inputs/raw
+	url = git@gin.g-node.org:/RemiGau/V5_high-res_pilot-1_raw.git
+	datalad-id = 9f77e14c-ff39-4a80-9121-916e5892e2b4
+	datalad-url = git@gin.g-node.org:/RemiGau/V5_high-res_pilot-1_raw.git
