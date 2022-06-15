@@ -21,7 +21,7 @@ Changes made to `outputs/derivatives/cpp_spm-roi/sub-'SubLabel'`
 - `sub-'SubLabel'/ses-001/roi` renamed to `sub-'SubLabel'/ses-001/anat`
 - `sub-'SubLabel'/roi` moved to `sub-'SubLabel'/ses-001/anat`
 - outputs of `bidsCreateRoi.m` renamed manually accordingly to BIDS format (Informaion about the session was missing, `ses-001` added to the filename).
-- outputs of `mergeMasks.m` renamed manually 
+- outputs of `mergeMasks.m` renamed manually
 - Layers file moved to `sub-'SubLabel'/ses-001/roi`
 
 Done for SubLabel= {pilot005}
@@ -60,6 +60,3 @@ working on sub-pilot005:
 
 
     2. Create 1 mask per layer
-
-
-
