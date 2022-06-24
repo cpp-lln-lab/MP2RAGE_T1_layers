@@ -22,24 +22,18 @@ for subIdx = 1:numel(opt.subjects)
     subLabel = opt.subjects{subIdx};
 
     %% get reference image
-    clear filter;
 
     filter.sub = subLabel;
     filter.suffix = 'mask';
-    filter.label = {'pFus', 'mFus', 'CoS'};
-    filter.desc = 'visfAtlas';
-    filter.modality = 'roi';
+    filter.desc = 'brain';
+    filter.modality = 'anat';
+    filter.space = 'individual';
 
     ref = bids.query(BIDSref, 'data', filter);
+    ref = ref{1};
 
-    % should have one image onl    assert(numel(ref) == 1);
-
-    %% get source images to reslice
+    %% get source image to reslice (ex vivo brain mask)
     clear filter;
-
-    filter.sub = subLabel;
-    filter.extension = '.nii';
-    filter.label = '6layerEquidist';
 
     layers = bids.query(BIDSsrc, 'data', filter);
     % should have one image only

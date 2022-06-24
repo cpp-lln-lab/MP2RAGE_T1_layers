@@ -47,7 +47,7 @@ for subIdx = 1:numel(opt.subjects)
 
     for roi_idx = 1:numel(list_of_rois)
         % read ROI
-        header_roi = spm_vol(list_of_rois{1});
+        header_roi = spm_vol(list_of_rois{roi_idx});
         roi_vol = spm_read_vols(header_roi);
 
         info_roi = char(extractBetween(list_of_rois(roi_idx), 'hemi-', '_desc-intercMasks_mask.nii'));
