@@ -8,8 +8,6 @@ run ../initEnv();
 
 opt = get_option_rois();
 
-opt.subjects = {'pilot005'};
-
 opt.dir.roi = opt.dir.output;
 
 BIDS = bids.layout(opt.dir.roi, 'use_schema', false);
@@ -25,6 +23,8 @@ for subIdx = 1:numel(opt.subjects)
     filter.label = {'mFus', 'pFus', 'CoS', 'V1d', 'V1v'};
     filter.atlas = {'visfAtlas', 'wang'};
     filter.modality = 'roi';
+    filter.desc = '6layers';
+    filter.prefix = 'r';
     
     ListofROIs = bids.query(BIDS, 'data', filter);
     
@@ -50,7 +50,7 @@ for subIdx = 1:numel(opt.subjects)
         header_roi = spm_vol(ListofROIs{roi_idx});
         roi_vol= spm_read_vols(header_roi);
         
-        info_roi=char(extractBetween(ListofROIs{roi_idx}, '/roi/sub', '_mask.nii'));
+        info_roi=char(extractBetween(ListofROIs{roi_idx}, ['rsub-' subLabel '_'], '_desc-'));
         info_roi_struct=strrep(info_roi, '-', ''); % '-' was giving problems when naming the fields in structure
         fprintf('ROI: %s', info_roi);
         

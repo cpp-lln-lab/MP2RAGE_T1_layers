@@ -24,17 +24,24 @@ for subIdx = 1:numel(opt.subjects)
     %% get reference image
 
     filter.sub = subLabel;
-    filter.suffix = 'mask';
-    filter.desc = 'brain';
+    filter.suffix = 'UNIT1';
     filter.modality = 'anat';
     filter.space = 'individual';
+    filter.desc = 'skullstripped';
+    filter.acq = 'r0p375';
 
     ref = bids.query(BIDSref, 'data', filter);
     ref = ref{1};
 
-    %% get source image to reslice (ex vivo brain mask)
+    %% get source image to reslice
     clear filter;
 
+    filter.sub = subLabel;
+    filter.extension = '.nii';
+    filter.label = '6layerEquidist';
+    filter.prefix = '';
+    
+    
     layers = bids.query(BIDSsrc, 'data', filter);
     % should have one image only
     assert(numel(layers) == 1);
@@ -55,7 +62,7 @@ for subIdx = 1:numel(opt.subjects)
     matlabbatch = {};
     matlabbatch = setBatchReslice(matlabbatch, opt, ref, layers, interpolation);
 
-    batchName = 'reslice_layers_to_mean_bold';
+    batchName = 'reslice_layers_to_UNIT1';
     saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
 
 end
