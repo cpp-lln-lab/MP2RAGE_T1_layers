@@ -4,6 +4,36 @@
 
 This is the YODA dataset for estimating T1 laminar profiles from MP2RAGE images. WIP
 
+## Data Source after removing Datalad subdatasets
+
+`.gitmodules` content omitting code submodules:
+
+```bash
+[submodule "outputs/derivatives"]
+	path = outputs/derivatives
+	url = git@gin.g-node.org:/cpp_brewery/MP2RAGE_T1_layers_derivatives.git
+	datalad-id = 2ca260f5-1d2b-4273-9d2f-6072d4d1945a
+[submodule "inputs/bidsNighres"]
+	path = inputs/bidsNighres
+	url = git@gin.g-node.org:/cpp_brewery/analysis_V5_high-res_pilot_nighres.git
+	datalad-id = 0168c8a1-949c-4f06-885f-0fa72925cedc
+[submodule "inputs/cpp_spm-preproc"]
+	path = inputs/cpp_spm-preproc
+	url = git@gin.g-node.org:/marcobarilari/analysis_high-res_MP2RAGE-layers_derivatives_cpp_spm-preproc.git
+	datalad-id = d39b0b30-153b-4595-936a-6771f67310f0
+	datalad-url = git@gin.g-node.org:/marcobarilari/analysis_high-res_MP2RAGE-layers_derivatives_cpp_spm-preproc.git
+[submodule "inputs/laynii-layers"]
+	path = inputs/laynii-layers
+	url = git@gin.g-node.org:/marcobarilari/analysis_high-res_MP2RAGE-layers_derivatives_laynii.git
+	datalad-id = 53cd3d3e-d2fa-4054-bb69-07869f683d6a
+	datalad-url = git@gin.g-node.org:/marcobarilari/analysis_high-res_MP2RAGE-layers_derivatives_laynii.git
+[submodule "inputs/raw"]
+	path = inputs/raw
+	url = git@gin.g-node.org:/RemiGau/V5_high-res_pilot-1_raw.git
+	datalad-id = 9f77e14c-ff39-4a80-9121-916e5892e2b4
+	datalad-url = git@gin.g-node.org:/RemiGau/V5_high-res_pilot-1_raw.git
+```
+
 ## DataLad datasets and how to use them
 
 <!-- BELOW IS THE TEMPLATE README FOR DATALAD DATASET
