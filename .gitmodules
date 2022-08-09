@@ -2,10 +2,6 @@
 	path = code/lib/CPP_SPM
 	url = https://github.com/cpp-lln-lab/CPP_SPM.git
 	datalad-url = https://github.com/cpp-lln-lab/CPP_SPM.git
-[submodule "outputs/derivatives"]
-	path = outputs/derivatives
-	url = git@gin.g-node.org:/cpp_brewery/MP2RAGE_T1_layers_derivatives.git
-	datalad-id = 2ca260f5-1d2b-4273-9d2f-6072d4d1945a
 [submodule "inputs/bidsNighres"]
 	path = inputs/bidsNighres
 	url = git@gin.g-node.org:/cpp_brewery/analysis_V5_high-res_pilot_nighres.git
