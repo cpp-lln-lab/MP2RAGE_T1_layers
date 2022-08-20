@@ -16,18 +16,6 @@ for subIdx = 1:numel(opt.subjects)
     header_aseg = spm_vol(aseg);
     aseg_vol = spm_read_vols(header_aseg);
 
-    %% csf matrix
-    label = 'CSF';
-    csf = zeros(size(aseg_vol));
-    csf(aseg_vol == 24) = 1;
-    % save csf
-    CSFFilename = ['sub-' subLabel '_ses-001' '_space-individual_label-CSF_desc-raseg.auto_noCCseg.nii'];
-    header_csf = header_aseg;
-    header_csf.fname = fullfile(opt.dir.roi, ['sub-' subLabel], 'ses-001/roi', CSFFilename);
-    header_csf.private.dat.fname = header_csf.fname;
-    header_csf.dt = header_aseg.dt;
-    csf_nii = spm_write_vol(header_csf, csf);
-
     %% white matter matrix
     label = 'WM';
     wm = zeros(size(aseg_vol));
