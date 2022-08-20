@@ -38,8 +38,8 @@ run 'ExtractT1Layers.m';
 
 % -------------------------------------------------------------%
 %% -----------------------Quality control---------------------%
-%-----------------run this on the raw data--------------------%
-%-------------------------------------------------------------%
+% -----------------run this on the raw data--------------------%
+% -------------------------------------------------------------%
 
 
 %%
@@ -87,6 +87,10 @@ run 'extract_snr_from_roi.m';
 
 addpath(fullfile(pwd, '..', 'calcCoV'));
 run 'CoregResliceses002UNIT1andT1map.m';
+<<<<<<< HEAD
 
 run 'calcCov.m';
 
+=======
+run 'calcCov.m';
+>>>>>>> [pre-commit.ci] auto fixes from pre-commit.com hooks
