@@ -5,7 +5,7 @@ function opt = get_option_preproc()
         opt = [];
     end
 
-    opt.subjects = {'pilot004', 'pilot005'};
+    opt.subjects = {'pilot004'};
 
     this_dir = fileparts(mfilename('fullpath'));
     root_dir = fullfile(this_dir, '..', '..', '..');
@@ -17,7 +17,7 @@ function opt = get_option_preproc()
     opt.pipeline.type = 'preproc';
     opt.dir.preproc = opt.dir.output;
     opt.anatOnly = true;
-    opt.skullstrip.threshold = 0.75;
+    opt.skullstrip.threshold = 0.90;
 
     opt.dir.roi = spm_file(fullfile(opt.dir.derivatives, 'cpp_spm-roi_acq-0p75'), 'cpath');
     opt.roi.name = {'IOG', 'OTS', 'ITG', ...
