@@ -8,7 +8,7 @@ for subIdx = 1:numel(opt.subjects)
     %% get brain mask
     filter.modality = 'anat';
     filter.sub = subLabel;
-    filter.ses = '002';    %change accordingly to the session
+    filter.ses = '001';    %change accordingly to the session
     filter.space = 'individual';
     %filter.acq = 'r0p75';
     filter.suffix = 'mask';
@@ -26,7 +26,9 @@ for subIdx = 1:numel(opt.subjects)
     %% get UNIT1
     filter.sub = subLabel;
     filter.suffix = 'UNIT1';
-    filter.ses = '002';    %change accordingly to the session
+    filter.ses = '001';    %change accordingly to the session
+    filter.desc = '';
+    filter.space = '';
     UNIT1 = bids.query(BIDS, 'data', filter);
     UNIT1 = UNIT1{:}; %because it complains: 'Struct contents reference from a non-struct array object.'
     
