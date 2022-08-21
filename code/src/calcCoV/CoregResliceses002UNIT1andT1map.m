@@ -26,18 +26,12 @@ for subIdx = 1:numel(opt.subjects)
 
     sub1stSesUNIT1 = bids.query(BIDS, 'data', filters);
     sub1stSesUNIT1 = sub1stSesUNIT1{1};
-
-    header_sub1stUNIT1 = spm_vol(sub1stSesUNIT1);
-    sub1stUNIT1_vol = spm_read_vols(header_sub1stUNIT1);
-
+    
     filters.ses = '002';
     filters.prefix = '';
 
     sub2stSesUNIT1 = bids.query(BIDS, 'data', filters);
     sub2stSesUNIT1 = sub2stSesUNIT1{1};
-
-    header_sub2ndUNIT1 = spm_vol(sub2stSesUNIT1);
-    sub2ndUNIT1_vol = spm_read_vols(header_sub2ndUNIT1);
 
     % find T1 map 001 and 002 sessions
     filter.sub = subLabel;
@@ -61,6 +55,7 @@ for subIdx = 1:numel(opt.subjects)
 
     header_sub2ndT1map = spm_vol(T1map_002);
     sub2ndT1map_vol = spm_read_vols(header_sub2ndT1map);
+
     %% coregistration UNIT1s
     matlabbatch = {};
     matlabbatch = setBatchCoregistration(matlabbatch, opt, sub1stSesUNIT1, sub2stSesUNIT1);
@@ -68,8 +63,6 @@ for subIdx = 1:numel(opt.subjects)
     batchName = 'coregister_Ses001_ses002_UNIT1';
     saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
 
-    sub1stUNIT1_vol(sub1stUNIT1_vol == 0) = NaN;
-    sub2ndUNIT1_vol(sub2ndUNIT1_vol == 0) = NaN;
     %% coregistration T1 maps
     matlabbatch = {};
     matlabbatch = setBatchCoregistration(matlabbatch, opt, T1map_001, T1map_002);
@@ -77,20 +70,11 @@ for subIdx = 1:numel(opt.subjects)
     batchName = 'coregister_Ses001_ses002_T1map';
     saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
 
-    sub1stT1map_vol(sub1stT1map_vol == 0) = NaN;
-    sub2ndT1map_vol(sub2ndT1map_vol == 0) = NaN;
-    %% reslice session 2 to session 1 dimensions UNIT1
-    interpolation = 0;
     matlabbatch = {};
-    matlabbatch = setBatchReslice(matlabbatch, opt, sub1stSesUNIT1, sub2stSesUNIT1, interpolation);
-
-    batchName = 'reslice_sessionsUNIT1';
+    matlabbatch = setBatchCoregistration(matlabbatch, opt, brainmask_001, brainmask_002);
+    
+    batchName = 'coregister_Ses001_ses002_brainmasks';
     saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
-    %% reslice session 2 to session 1 dimensions T1 maps
-    interpolation = 0;
-    matlabbatch = {};
-    matlabbatch = setBatchReslice(matlabbatch, opt, T1map_001, T1map_002, interpolation);
-
-    batchName = 'reslice_sessionsT1map';
-    saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+  
+    
 end
