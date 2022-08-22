@@ -1,6 +1,6 @@
 [![made-with-datalad](https://www.datalad.org/badges/made_with.svg)](https://datalad.org)
 
-# this is a text
+# this is a test
 
 # Project MP2RAGE_T1_layers
 
