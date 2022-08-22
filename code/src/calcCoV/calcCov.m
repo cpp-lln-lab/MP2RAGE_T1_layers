@@ -174,4 +174,3 @@ for subIdx = 1:numel(opt.subjects)
     bids.util.tsvwrite(fileNameCovStatsT1map, CovStatsT1map);
 
 end
-
