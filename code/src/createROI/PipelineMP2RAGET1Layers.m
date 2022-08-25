@@ -38,9 +38,8 @@ run 'ExtractT1Layers.m';
 
 % -------------------------------------------------------------%
 %% -----------------------Quality control---------------------%
-% -------------run this in the "untouched" data----------------%
-%             no resample, no bias correction                 %
-% -------------------------------------------------------------%
+%-----------------run this on the raw data--------------------%
+%-------------------------------------------------------------%
 
 %%
 % -------------------------------------------------------------%
@@ -78,7 +77,7 @@ intercept_ROI_and_brainmask(opt);
 
 run 'resliceAsegAutoToUNIT1.m';
 run 'intercept_aseg_brainmask.m';
-run 'createMaskCsfWmGmFromFreeSurferAseg.m';
+run 'createMaskForegroundWMGMAseg.m';
 
 run 'extract_snr_from_roi.m';
 
@@ -87,14 +86,5 @@ run 'extract_snr_from_roi.m';
 
 addpath(fullfile(pwd, '..', 'calcCoV'));
 run 'CoregResliceses002UNIT1andT1map.m';
-run 'calcCov.m';
-% -------------------------------------------------------------%
-% -------------------------------------------------------------%
-%% Signal loss
-% irst normalize ex vivo brain
-% opt = getOptionReslice();
-% %normalize in vivo brain
-% run 'CreateExvivoBrainmask.m';
-% run 'ResliceExvivo.m';
 
-% --------------------------- THE END --------------------------%
+run 'calcCov.m';
