@@ -40,8 +40,7 @@ for subIdx = 1:numel(opt.subjects)
     filter.extension = '.nii';
     filter.label = '6layerEquidist';
     filter.prefix = '';
-    
-    
+
     layers = bids.query(BIDSsrc, 'data', filter);
     % should have one image only
     assert(numel(layers) == 1);
