@@ -1,4 +1,3 @@
-
 clear;
 clc;
 
@@ -11,7 +10,7 @@ opt = getOptionReslice();
 BIDSref = bids.layout(opt.dir.output, 'use_schema', false);
 BIDSsrc = bids.layout(opt.dir.output, 'use_schema', false);
 
-opt.subjects = {'pilot001', 'pilot004','pilot005'};
+opt.subjects = {'pilot001', 'pilot004', 'pilot005'};
 
 src = fullfile(opt.dir.output, 'acq-0p15_desc-brainmaskExvivo.nii');
 
@@ -31,9 +30,9 @@ for subIdx = 1:numel(opt.subjects)
 
     ref = bids.query(BIDSref, 'data', filter);
     ref = ref{1};
-    
-    clear filter
-  
+
+    clear filter;
+
     %% reslice with nearest neighbour interpolation
     interpolation = 0;
     matlabbatch = {};

@@ -24,7 +24,7 @@ Done for pilot001, pilot004 and pilot005:
 
 2. Manually copy files using the terminal: `copy -L path/to/file path/to/folder` (0p375mm UNIT1, Deformation field, Brain mask, Layers, T1 map)
 
-3. Run first part of `PipelineMP2RAGET1Layers.m` 
+3. Run first part of `PipelineMP2RAGET1Layers.m`
 
 ## Log of steps
 1. Update `get_option_rois.m`:
@@ -39,14 +39,14 @@ Done for pilot001, pilot004 and pilot005:
         - opt.roi.name = {'V1v', 'V1d'};
 
         Changed to:
-        
+
         - opt.roi.atlas = 'visfAtlas';
         - opt.roi.name = {'mFus', 'pFus', 'CoS'};
 
         ** bidsCreateROI.m runs for all ROIs in the `group` folder -> to fix!
 
 2. Manually copied files using the terminal: `copy -L path/to/file path/to/folder` for each subject (if not done before, get the content of interest using the terminal: `datalad get 'path/to/file'`):
-        
+
         Look for the following patterns in `inputs/cpp_spm-preproc/sub-'subLabel'/ses-001` and copy them to `outputs/derivatives/cpp_spm-roi/sub-'subLabel'/ses-001/roi`
 
             1. 0p375mm UNIT1:`*acq-r0p375_desc-skullstripped_space-individual_UNIT1.nii`
@@ -64,12 +64,12 @@ Done for pilot001, pilot004 and pilot005:
 3. Run script until `extractT1Layers.m`
         Ensure that the following variables were changed:
 
-                `resliceLayersToROi.m`: 
+                `resliceLayersToROi.m`:
                     filter.acq = 'r0p375';
                 `resliceRoiToBrainmask.m`:
                     filter.label = {'V1d', 'V1v', 'v1v', 'v1d', 'pFus', 'mFus', 'CoS'};
                     filter.ses = '001';
-                    filter.acq = 'r0p375'; 
+                    filter.acq = 'r0p375';
                 `intercept_ROI_and_brainmask.m`:
                     filter.ses = '001';
                     filter.acq = 'r0p375';
@@ -107,11 +107,11 @@ Done for pilot001, pilot004 and pilot005:
             opt.subjects = {'pilot001', 'pilot004', 'pilot005'}; (delete pilot001 to run CoV)
 
 
-3. Manually copied files using the terminal: `copy -L path/to/file path/to/folder` for each subject from `inputs/raw/sub-'subLabel'/ses-''/anat/` 
+3. Manually copied files using the terminal: `copy -L path/to/file path/to/folder` for each subject from `inputs/raw/sub-'subLabel'/ses-''/anat/`
 
         - UNIT1: `sub-'subLabel'_ses-001_acq-r0p75_UNIT1.nii`
-    
-    and copy from `inputs/bisNighres/sub-'subLabel'/ses-''/anat/` for each subject: 
+
+    and copy from `inputs/bisNighres/sub-'subLabel'/ses-''/anat/` for each subject:
 
         - T1 map: `sub-'subLabel'_ses-''_acq-r0p75_desc-skullstripped_T1map.nii`
 
@@ -142,13 +142,13 @@ Done for pilot001, pilot004 and pilot005:
             `createMaskCsfWmGmFromFreeSurferAseg.m`
                 - check that FreeSurfer map numbers are the following:
                     CSF:24
-                    WM: 2(Left), 41 (Right) 
+                    WM: 2(Left), 41 (Right)
                     GM: 3(Left), 42 (Right)
             `extract_snr_from_roi.m`
                 filter.ses = '001'
 
         SpatialPreproc: it runs for the first anat file if finds, which is the file of interest for us (function `getAnatFilename`). to fix!
-    
+
     ### Log first steps done to estimate Signal loss
 
             - download both 3d ex vivo brains in MNI space (0.5 mm resolution) from the database (Alkemade et al. 2022, DOI: 10.1126/sciadv.abj7892))
