@@ -5,12 +5,7 @@ clc;
 
 run ../initEnv();
 
-% opt = getOptionPreproc('mp2rage');
-
 opt = get_option_rois();
-
-% opt.dir.roi = fullfile(opt.dir.preproc, '..', 'cpp_spm-roi');
-% opt.dir.jobs = fullfile(opt.dir.output, 'jobs', 'gratingBimodalMotion');
 
 opt.dryRun =  false;
 
@@ -46,16 +41,7 @@ for subIdx = 1:numel(opt.subjects)
     assert(numel(layers) == 1);
 
     clear filter;
-
-    %     filter.sub = subLabel;
-    %     filter.suffix = 'mask';
-    %     filter.prefix = '';
-    %     filter.extension = '.nii';
-    %
-    %     masks = bids.query(BIDSsrc, 'data', filter);
-
-    %     src = cat(1, layers, masks);
-
+    
     %% reslice with nearest neighbour interpolation
     interpolation = 0;
     matlabbatch = {};

@@ -5,7 +5,7 @@ function opt = get_option_preproc()
         opt = [];
     end
 
-    opt.subjects = {'pilot004'};
+    opt.subjects = {'pilot001'};
 
     this_dir = fileparts(mfilename('fullpath'));
     root_dir = fullfile(this_dir, '..', '..', '..');
@@ -17,7 +17,7 @@ function opt = get_option_preproc()
     opt.pipeline.type = 'preproc';
     opt.dir.preproc = opt.dir.output;
     opt.anatOnly = true;
-    opt.skullstrip.threshold = 0.90;
+    opt.skullstrip.threshold = 0.75;
 
     opt.dir.roi = spm_file(fullfile(opt.dir.derivatives, 'cpp_spm-roi_acq-0p75'), 'cpath');
     opt.roi.name = {'IOG', 'OTS', 'ITG', ...
@@ -28,7 +28,7 @@ function opt = get_option_preproc()
 
     opt.bidsFilterFile.roi.suffix = '';
     opt.bidsFilterFile.t1w.suffix = 'UNIT1';
-    opt.bidsFilterFile.t1w.ses = '001';
+    opt.bidsFilterFile.t1w.ses = '005';
     opt.dryRun = false; % don't want to run the analysis
 
     % If you use 'individual', then we stay in native space (that of the anat image)

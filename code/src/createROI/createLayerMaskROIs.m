@@ -24,7 +24,7 @@ for subIdx = 1:numel(opt.subjects)
     filter.atlas = {'visfAtlas', 'wang'};
     filter.modality = 'roi';
     filter.desc = '6layers';
-    filter.prefix = 'r';
+    filter.prefix = '';
 
     ListofROIs = bids.query(BIDS, 'data', filter);
 
@@ -41,7 +41,7 @@ for subIdx = 1:numel(opt.subjects)
 
     hdr = spm_vol(ListofROIs);
 
-    layer_seg = spm_read_vols(spm_vol(File6Layers));
+     layer_seg = spm_read_vols(spm_vol(File6Layers));
 
     % Intersaction ROIs and layers
     Info_ROIs = [];
@@ -50,7 +50,7 @@ for subIdx = 1:numel(opt.subjects)
         header_roi = spm_vol(ListofROIs{roi_idx});
         roi_vol = spm_read_vols(header_roi);
 
-        info_roi = char(extractBetween(ListofROIs{roi_idx}, ['rsub-' subLabel '_'], '_desc-'));
+        info_roi = char(extractBetween(ListofROIs{roi_idx}, ['sub-' subLabel '_ses-001_'], '_desc-'));
         info_roi_struct = strrep(info_roi, '-', ''); % '-' was giving problems when naming the fields in structure
         fprintf('ROI: %s', info_roi);
 
