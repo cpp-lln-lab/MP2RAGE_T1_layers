@@ -9,8 +9,7 @@ function intercept_ROI_and_layers(opt)
         subLabel = opt.subjects{iSub};
         printProcessingSubject(iSub, subLabel, opt);
 
-        % find resliced layers
-
+        %% find resliced layers
         filter.sub = subLabel;
         filter.acq = 'r0p375';
         filter.space = 'individual';
@@ -23,41 +22,34 @@ function intercept_ROI_and_layers(opt)
 
         clear filter;
 
-        % find ROIs
+        %% find ROIs intercepted with T1 map binary mask
         filter.sub = subLabel;
         filter.ses = '001';
         filter.space = 'individual';
-        filter.label = {'V1d', 'V1v', 'v1v', 'v1d', 'pFus', 'mFus', 'CoS'};
+        filter.label = {'V1d', 'V1v', 'pFus', 'mFus', 'CoS'};
         filter.suffix = 'mask';
-        filter.desc = 'intercMasks';
-        filter.prefix = 'r';
+        filter.desc = 'intercT1mapBin';
+        filter.prefix = '';
 
         listofRois = bids.query(BIDSref, 'data', filter);
         clear filter;
         [BIDS, opt] = setUpWorkflow(opt, 'intercept ROI and layers');
-
-        HeaderLayers = spm_vol(layers);
-        Layers = spm_read_vols(HeaderLayers);
-
         for ROIidx = 1:numel(listofRois)
+            Roiname = strcat(char(extractBetween(listofRois{ROIidx}, '\roi\', 'desc-')), 'desc-6layers_mask.nii');
+            session = char(extractBetween(listofRois{ROIidx}, '\ses-', '\roi\'));
+            Roi = char(extractBetween(listofRois{ROIidx}, ['\roi\sub-' subLabel '_ses-' session '_'], '_mask.nii'));
+            %% multiplication ROIs and layers
+            exp = 'i1.*i2';
+            % set batch image calculator
+            input = {layers; listofRois{ROIidx}};
+            outDir = fullfile(opt.dir.output, ['sub-' subLabel '\ses-' session '\roi']);
+            outputCommonVoxels = fullfile(outDir, Roiname);
+            matlabbatch = {};
+            matlabbatch = setBatchImageCalculation(matlabbatch, opt, input, outputCommonVoxels, outDir, exp, 'float32');
+            matlabbatch{1}.spm.util.imcalc.options.interp = 0;
 
-            HeaderRoi = spm_vol(listofRois{ROIidx});
-            Roi = spm_read_vols(HeaderRoi);
-
-            Intercept = Roi .* Layers;
-            % Step 1.  Take the header information from a previous file with similar dimensions
-            %          and voxel sizes and change the filename in the header.
-            HeaderInfo = HeaderRoi;
-
-            Roiname = strcat(char(extractBetween(listofRois{ROIidx}, '/roi/', 'desc-')), 'desc-6layers_mask.nii');
-            session = char(extractBetween(listofRois{ROIidx}, '/ses-', '/roi/'));
-            HeaderInfo.fname = fullfile(opt.dir.roi, ['sub-' subLabel], ['ses-' session], 'roi', Roiname);  % This is where you fill in the new filename
-            HeaderInfo.dt = HeaderLayers.dt;
-            HeaderInfo.private.dat.fname = HeaderInfo.fname;  % This just replaces the old filename in another location within the header.
-
-            % Step 2.  Now use spm_write_vol to write out the new data.
-            %          You need to give spm_write_vol the new header information and corresponding data matrix
-            spm_write_vol(HeaderInfo, Intercept);  % where HeaderInfo is your header information for the new file, and Data is the image matrix corresponding to the image you'll be writing out.
+            batchName = 'VoxelCount';
+            saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
 
         end
     end

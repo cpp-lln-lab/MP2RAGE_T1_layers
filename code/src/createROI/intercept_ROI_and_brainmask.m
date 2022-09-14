@@ -9,50 +9,69 @@ function intercept_ROI_and_brainmask(opt)
         subLabel = opt.subjects{subIdx};
         fprintf('subject number: %d\n', subIdx);
 
-        %% get brain mask
+        %% get  T1 map binary mask
         filter.sub = subLabel;
         filter.ses = '001';
-        filter.space = 'individual';
+        filter.acq = 'r0p75'; % change depending on the pipeline
+        filter.suffix = 'T1map';
+        filter.desc = 'brainmask';
+        binaryT1map = bids.query(BIDS, 'data', filter);
+        binaryT1map = binaryT1map{:}; 
+
+        %% get UNIT1 binary mask
+        filter.sub = subLabel;
+        filter.ses = '001';
         filter.acq = 'r0p75'; % change depending on the pipeline
         filter.suffix = 'mask';
-        brainmask = bids.query(BIDS, 'data', filter);
-        brainmask = brainmask{:}; % because it complains: 'Struct contents reference from a non-struct array object.'
+        filter.desc = 'brain';
+        binaryUNIT1 = bids.query(BIDS, 'data', filter);
+        binaryUNIT1 = binaryUNIT1{:}; 
 
         clear filter;
 
-        Headerbrainmask = spm_vol(brainmask);
-        Brainmask = spm_read_vols(Headerbrainmask);
-
-        %% find resliced images to perform multiplication
+        %% find ROIs
         clear filter;
         filter.sub = subLabel;
         filter.ses = '001';
         filter.space = 'individual';
         filter.suffix = 'mask';
+        filter.prefix= '';
         filter.hemi = {'L', 'R'};
-        filter.prefix = 'r';
         filter.desc = ''; % to remove the interception of masks files already in the folder
-
-        listofROIs_resliced = bids.query(BIDS, 'data', filter);
-
+        listofROIs = bids.query(BIDS, 'data', filter);
+        %filter.label = {'V1v', 'V1d', 'pFus', 'mFus', 'CoS'};
         clear filter;
 
-        for ROIidx = 1:numel(listofROIs_resliced)
-            HeaderRoi = spm_vol(listofROIs_resliced{ROIidx});
-            Roi = spm_read_vols(HeaderRoi);
-            Intercept = Roi .* Brainmask;
-            % Step 1.  Take the header information from a previous file with similar dimensions
-            %          and voxel sizes and change the filename in the header.
-            HeaderInfo = HeaderRoi;
-            Roiname = strcat(char(extractBetween(listofROIs_resliced{ROIidx}, '/roi/', '_mask.nii')), '_desc-intercMasks_mask.nii');
-            session = char(extractBetween(listofROIs_resliced{ROIidx}, '/ses-', '/roi/'));
-            HeaderInfo.fname = fullfile(opt.dir.roi, ['sub-' subLabel], ['ses-' session], 'roi', Roiname);  % This is where you fill in the new filename
+        for ROIidx = 1:numel(listofROIs)
+            %% common voxels T1 maps - binary mask
+            RoinameT1map = strcat(char(extractBetween(listofROIs{ROIidx}, '\roi\', '_mask.nii')), '_desc-intercT1mapBin_mask.nii');
+            RoinameUNIT1 = strcat(char(extractBetween(listofROIs{ROIidx}, '\roi\', '_mask.nii')), '_desc-intercUNIT1Bin_mask.nii');
+            session = char(extractBetween(listofROIs{ROIidx}, '\ses-', '\roi\'));
+            Roi = char(extractBetween(listofROIs{ROIidx}, ['\roi\sub-' subLabel '_ses-' session '_'], '_mask.nii'));
+            
+            exp = 'i1.*i2';            
+            outDir = fullfile(opt.dir.output, ['sub-' subLabel], ['ses-' session], 'roi');
+            %% set batch T1 map
+            inputsT1map = {binaryT1map; listofROIs{ROIidx}};
+            outputT1map = fullfile(outDir, RoinameT1map);
+            
+            matlabbatch = {};
+            matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputsT1map, outputT1map, outDir, exp, 'int16');
+            matlabbatch{1}.spm.util.imcalc.options.interp = 0;
 
-            HeaderInfo.private.dat.fname = HeaderInfo.fname;  % This just replaces the old filename in another location within the header.
-
-            % Step 2.  Now use spm_write_vol to write out the new data.
-            %          You need to give spm_write_vol the new header information and corresponding data matrix
-            spm_write_vol(HeaderInfo, Intercept);  % where HeaderInfo is your header information for the new file, and Data is the image matrix corresponding to the image you'll be writing out.
-        end
+            batchName = 'Common Voxels ROIs and T1 binary mask';
+            saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+            %% set batch UNIT1
+            inputsUNIT1 = {binaryUNIT1; listofROIs{ROIidx}};
+            outputUNIT1 = fullfile(outDir, RoinameUNIT1);
+            
+            matlabbatch = {};
+            matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputsUNIT1, outputUNIT1, outDir, exp, 'int16');
+            matlabbatch{1}.spm.util.imcalc.options.interp = 0;
+            
+            batchName = 'Common Voxels ROIs and UNIT1 binary mask';
+            saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+            
+            end
     end
 end
