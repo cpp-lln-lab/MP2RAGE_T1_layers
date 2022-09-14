@@ -9,11 +9,16 @@ opt.dir.roi = opt.dir.output;
 BIDS = bids.layout(opt.dir.roi, 'use_schema', false);
 
 for subIdx = 1:numel(opt.subjects)
-
     subLabel = opt.subjects{subIdx};
-    aseg = fullfile(opt.dir.roi, ['sub-' subLabel], 'ses-001/anat', 'aseg.auto_noCCseg.nii');
-    % aseg = aseg{1};
-
+    
+    %% find aseg
+        filter.modality = 'anat';
+        filter.sub = subLabel;
+        filter.ses = '001';    % change accordingly to the session
+        filter.acq = 'r0p75';
+        filter.suffix = 'aseg';
+        aseg = bids.query(BIDS, 'data', filter);
+        
     %% select UNIT1
     filter.sub = subLabel;
     filter.suffix = 'UNIT1';
