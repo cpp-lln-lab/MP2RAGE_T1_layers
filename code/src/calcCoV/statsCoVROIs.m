@@ -9,6 +9,10 @@ opt = get_option_preproc();
 
 BIDS = bids.layout(opt.dir.output, 'use_schema', false);
 
+opt.roi.name = {'IOG', 'OTS', 'ITG', 'V1v', 'V1d', ...
+    'MTG', 'LOS', 'hMT', 'v2d', 'v3d',...
+    'v2v', 'v3v', 'mFus', 'pFus', 'CoS'};
+
 for subIdx = 1:numel(opt.subjects)
     subLabel = opt.subjects{subIdx};
     %% statistics ROIs
@@ -25,45 +29,77 @@ for subIdx = 1:numel(opt.subjects)
     filter.sub = subLabel;
     filter.suffix = {'mask'};
     filter.desc = 'intercUNIT1SessionsBin';
-    filter.atlas = {'visfAtlas', 'wang'};
+    filter.label = opt.roi.name;
     filter.prefix = '';
     filter.ses = '001'; 
+    filter.hemi = 'L';
     
-    listofROIsUNIT1 = bids.query(BIDS, 'data', filter);
+    listofROIsUNIT1_L = bids.query(BIDS, 'data', filter);
+    
+    filter.hemi = 'R';
+    listofROIsUNIT1_R = bids.query(BIDS, 'data', filter);
     clear filter
-    CovRoiUNIT1 = struct();
     
-    for roi_idx = 1:numel(listofROIsUNIT1)
+    CovRoiUNIT1_L = struct();
+    CovRoiUNIT1_R = struct();
+    
+    for roi_idx = 1:numel(listofROIsUNIT1_L)
 
-        info_roi = char(extractBetween(listofROIsUNIT1(roi_idx), 'hemi-', '_desc-intercUNIT1SessionsBin_mask.nii'));
-        info_roi_struct = strrep(info_roi, '-', ''); 
+        info_roi = char(extractBetween(listofROIsUNIT1_L(roi_idx), 'label-', '_'));
         fprintf('ROI: %s', info_roi);
 
-        CovRoiUNIT1.(info_roi_struct) = spm_summarise(UNIT1CoV, listofROIsUNIT1{roi_idx});
+        CovRoiUNIT1_L.(info_roi) = spm_summarise(UNIT1CoV, listofROIsUNIT1_L{roi_idx});
+        CovRoiUNIT1_R.(info_roi) = spm_summarise(UNIT1CoV, listofROIsUNIT1_R{roi_idx});        
     end
 
-    % UNIT1 stats
-    field = fieldnames(CovRoiUNIT1);
-    meanCovRoiUNIT1 = structfun(@mean, CovRoiUNIT1, 'uniform', 0);
-    stdsUNIT1 = structfun(@std, CovRoiUNIT1, 'uniform', 0);
-    nVoxelsUNIT1 = structfun(@numel, CovRoiUNIT1);
-    minROIUNIT1 = structfun(@min, CovRoiUNIT1, 'uniform', 0);
-    maxROIUNIT1 = structfun(@max, CovRoiUNIT1, 'uniform', 0);
-    medianROIUNIT1 = structfun(@median, CovRoiUNIT1, 'uniform', 0);
+    %% UNIT1 stats
+    %Left
+    field_L = fieldnames(CovRoiUNIT1_L);
+    meanCovRoiUNIT1_L = structfun(@mean, CovRoiUNIT1_L, 'uniform', 0);
+    stdsUNIT1_L = structfun(@std, CovRoiUNIT1_L, 'uniform', 0);
+    nVoxelsUNIT1_L = structfun(@numel, CovRoiUNIT1_L);
+    minROIUNIT1_L = structfun(@min, CovRoiUNIT1_L, 'uniform', 0);
+    maxROIUNIT1_L = structfun(@max, CovRoiUNIT1_L, 'uniform', 0);
+    medianROIUNIT1_L = structfun(@median, CovRoiUNIT1_L, 'uniform', 0);
+    iqrROIUNIT1_L = structfun(@iqr, CovRoiUNIT1_L, 'uniform', 0);
 
-    MeanCovUNIT1 = struct2cell(meanCovRoiUNIT1);
-    StdCovUNIT1 = struct2cell(stdsUNIT1);
-    MinUNIT1 = cell2mat(struct2cell(minROIUNIT1));
-    MaxUNIT1 = cell2mat(struct2cell(maxROIUNIT1));
-    medianCovUNIT1 = cell2mat(struct2cell(medianROIUNIT1));
+    MeanCovUNIT1_L = struct2cell(meanCovRoiUNIT1_L);
+    StdCovUNIT1_L = struct2cell(stdsUNIT1_L);
+    MinUNIT1_L = cell2mat(struct2cell(minROIUNIT1_L));
+    MaxUNIT1_L = cell2mat(struct2cell(maxROIUNIT1_L));
+    medianCovUNIT1_L = cell2mat(struct2cell(medianROIUNIT1_L));
+    IqrROIUNIT1_L = struct2cell(iqrROIUNIT1_L);
 
-    CovStatsUNIT1 = table(field, MeanCovUNIT1, medianCovUNIT1, StdCovUNIT1, nVoxelsUNIT1, MinUNIT1, MaxUNIT1);
+    %right
+    field_R = fieldnames(CovRoiUNIT1_R);
+    meanCovRoiUNIT1_R = structfun(@mean, CovRoiUNIT1_R, 'uniform', 0);
+    stdsUNIT1_R = structfun(@std, CovRoiUNIT1_R, 'uniform', 0);
+    nVoxelsUNIT1_R = structfun(@numel, CovRoiUNIT1_R);
+    minROIUNIT1_R = structfun(@min, CovRoiUNIT1_R, 'uniform', 0);
+    maxROIUNIT1_R = structfun(@max, CovRoiUNIT1_R, 'uniform', 0);
+    medianROIUNIT1_R = structfun(@median, CovRoiUNIT1_R, 'uniform', 0);
+    iqrROIUNIT1_R = structfun(@iqr, CovRoiUNIT1_R, 'uniform', 0);
+    IqrROIUNIT1_R = struct2cell(iqrROIUNIT1_R);
+
+    MeanCovUNIT1_R = struct2cell(meanCovRoiUNIT1_R);
+    StdCovUNIT1_R = struct2cell(stdsUNIT1_R);
+    MinUNIT1_R = cell2mat(struct2cell(minROIUNIT1_R));
+    MaxUNIT1_R = cell2mat(struct2cell(maxROIUNIT1_R));
+    medianCovUNIT1_R = cell2mat(struct2cell(medianROIUNIT1_R));
+    
+    % Create table
+    CovStatsUNIT1_L = table(field_L, MeanCovUNIT1_L, medianCovUNIT1_L, IqrROIUNIT1_L, StdCovUNIT1_L, nVoxelsUNIT1_L, MinUNIT1_L, MaxUNIT1_L);
+    CovStatsUNIT1_R = table(field_R, MeanCovUNIT1_R, medianCovUNIT1_R, IqrROIUNIT1_R, StdCovUNIT1_R, nVoxelsUNIT1_R, MinUNIT1_R, MaxUNIT1_R);
 
     outputNameCovStatsUNIT1 = ['sub-' subLabel ...
-                               '_acq-r0p75_desc-CovStatsROIs_UNIT1.tsv'];
+                               '_acq-r0p75_hemi-L_desc-CovStatsROIs_UNIT1.tsv';...
+                               'sub-' subLabel ...
+                               '_acq-r0p75_hemi-R_desc-CovStatsROIs_UNIT1.tsv'];
 
-    fileNameCovStatsUNIT1 = fullfile(opt.dir.output, ['sub-' subLabel], outputNameCovStatsUNIT1);
-    bids.util.tsvwrite(fileNameCovStatsUNIT1, CovStatsUNIT1);
+    fileNameCovStatsUNIT1_L = fullfile(opt.dir.output, ['sub-' subLabel], outputNameCovStatsUNIT1(1,:));
+    fileNameCovStatsUNIT1_R = fullfile(opt.dir.output, ['sub-' subLabel], outputNameCovStatsUNIT1(2,:));
+    bids.util.tsvwrite(fileNameCovStatsUNIT1_L, CovStatsUNIT1_L);
+    bids.util.tsvwrite(fileNameCovStatsUNIT1_R, CovStatsUNIT1_R);
 
     % T1 map
     %% find ROIs T1 map
@@ -71,42 +107,73 @@ for subIdx = 1:numel(opt.subjects)
     filter.sub = subLabel;
     filter.suffix = {'mask'};
     filter.desc = 'intercT1mapSessionsBin';
-    filter.atlas = {'visfAtlas', 'wang'};
+    filter.label = opt.roi.name;
     filter.prefix = '';
+    filter.hemi = 'L';
     filter.ses = '001'; 
 
-    listofROIsT1map = bids.query(BIDS, 'data', filter);
+    listofROIsT1map_L = bids.query(BIDS, 'data', filter);
+    
+    filter.hemi = 'R';
+    listofROIsT1map_R = bids.query(BIDS, 'data', filter);
 
     clear filter;
-    CovRoiUNIT1 = struct();
+    CovRoiT1map_L = struct();
+    CovRoiT1map_R = struct();
 
-    for roi_idx = 1:numel(listofROIsT1map)
-
-        info_roi = char(extractBetween(listofROIsT1map(roi_idx), 'hemi-', '_desc-intercT1mapSessionsBin_mask.nii'));
-        info_roi_struct = strrep(info_roi, '-', ''); 
+    for roi_idx = 1:numel(listofROIsT1map_L)
+        
+        info_roi = char(extractBetween(listofROIsUNIT1_L(roi_idx), 'label-', '_'));
         fprintf('ROI: %s', info_roi);
-
-        CovRoiT1map.(info_roi_struct) = spm_summarise(T1mapCoV, listofROIsT1map{roi_idx});
+        CovRoiT1map_L.(info_roi) = spm_summarise(T1mapCoV, listofROIsT1map_L{roi_idx});
+        CovRoiT1map_R.(info_roi) = spm_summarise(T1mapCoV, listofROIsT1map_R{roi_idx});
     end
     
-    meanCovRoiT1map = structfun(@mean, CovRoiT1map, 'uniform', 0);
-    stdsT1map = structfun(@std, CovRoiT1map, 'uniform', 0);
-    nVoxelsT1map = structfun(@numel, CovRoiT1map);
-    minROIT1map = structfun(@min, CovRoiT1map, 'uniform', 0);
-    maxROIT1map = structfun(@max, CovRoiT1map, 'uniform', 0);
-    medianROIT1map = structfun(@median, CovRoiT1map, 'uniform', 0);
+    %LEFT
+    meanCovRoiT1map_L = structfun(@mean, CovRoiT1map_L, 'uniform', 0);
+    stdsT1map_L = structfun(@std, CovRoiT1map_L, 'uniform', 0);
+    nVoxelsT1map_L = structfun(@numel, CovRoiT1map_L);
+    minROIT1map_L = structfun(@min, CovRoiT1map_L, 'uniform', 0);
+    maxROIT1map_L = structfun(@max, CovRoiT1map_L, 'uniform', 0);
+    medianROIT1map_L = structfun(@median, CovRoiT1map_L, 'uniform', 0);
+    
+    iqrROIT1map_L = structfun(@iqr, CovRoiUNIT1_L, 'uniform', 0);
+    IqrROIT1map_L = struct2cell(iqrROIT1map_L);
 
-    MeanCovT1map = struct2cell(meanCovRoiT1map);
-    StdCovT1map = struct2cell(stdsT1map);
-    MinT1map = cell2mat(struct2cell(minROIT1map));
-    MaxT1map = cell2mat(struct2cell(maxROIT1map));
-    medianCovT1map = cell2mat(struct2cell(medianROIT1map));
+    MeanCovT1map_L = struct2cell(meanCovRoiT1map_L);
+    StdCovT1map_L = struct2cell(stdsT1map_L);
+    MinT1map_L = cell2mat(struct2cell(minROIT1map_L));
+    MaxT1map_L = cell2mat(struct2cell(maxROIT1map_L));
+    medianCovT1map_L = cell2mat(struct2cell(medianROIT1map_L));
 
-    CovStatsT1map = table(field, MeanCovT1map, medianCovT1map, StdCovT1map, nVoxelsT1map, MinT1map, MaxT1map);
+    
+    %right
+    meanCovRoiT1map_R = structfun(@mean, CovRoiT1map_R, 'uniform', 0);
+    stdsT1map_R = structfun(@std, CovRoiT1map_R, 'uniform', 0);
+    nVoxelsT1map_R = structfun(@numel, CovRoiT1map_R);
+    minROIT1map_R = structfun(@min, CovRoiT1map_R, 'uniform', 0);
+    maxROIT1map_R = structfun(@max, CovRoiT1map_R, 'uniform', 0);
+    medianROIT1map_R = structfun(@median, CovRoiT1map_R, 'uniform', 0);
+
+    iqrROIT1map_R = structfun(@iqr, CovRoiT1map_R, 'uniform', 0);
+    IqrROIT1map_R = struct2cell(iqrROIT1map_R);
+
+    MeanCovT1map_R = struct2cell(meanCovRoiT1map_R);
+    StdCovT1map_R = struct2cell(stdsT1map_R);
+    MinT1map_R = cell2mat(struct2cell(minROIT1map_R));
+    MaxT1map_R = cell2mat(struct2cell(maxROIT1map_R));
+    medianCovT1map_R = cell2mat(struct2cell(medianROIT1map_R));
+    
+    CovStatsT1map_L = table(field_L, MeanCovT1map_L, medianCovT1map_L, IqrROIT1map_L, StdCovT1map_L, nVoxelsT1map_L, MinT1map_L, MaxT1map_L);
+    CovStatsT1map_R = table(field_R, MeanCovT1map_R, medianCovT1map_R, IqrROIT1map_R, StdCovT1map_R, nVoxelsT1map_R, MinT1map_R, MaxT1map_R);
 
     outputNameCovStatsT1map = ['sub-' subLabel ...
-                               '_acq-r0p75_desc-CovStatsROIs_T1map.tsv'];
+                               '_acq-r0p75_hemi-L_desc-CovStatsROIs_T1map.tsv';...
+                               'sub-' subLabel ...
+                               '_acq-r0p75_hemi-R_desc-CovStatsROIs_T1map.tsv'];
 
-    fileNameCovStatsT1map = fullfile(opt.dir.output, ['sub-' subLabel], outputNameCovStatsT1map);
-    bids.util.tsvwrite(fileNameCovStatsT1map, CovStatsT1map);
+    fileNameCovStatsT1map_L = fullfile(opt.dir.output, ['sub-' subLabel], outputNameCovStatsT1map(1,:));
+    fileNameCovStatsT1map_R = fullfile(opt.dir.output, ['sub-' subLabel], outputNameCovStatsT1map(2,:));    
+    bids.util.tsvwrite(fileNameCovStatsT1map_L, CovStatsT1map_L);
+    bids.util.tsvwrite(fileNameCovStatsT1map_R, CovStatsT1map_R);
 end
