@@ -5,7 +5,7 @@ function opt = get_option_preproc()
         opt = [];
     end
 
-    opt.subjects = {'pilot001'};
+    opt.subjects = {'pilot001', 'pilot004', 'pilot005'};
 
     this_dir = fileparts(mfilename('fullpath'));
     root_dir = fullfile(this_dir, '..', '..', '..');
@@ -21,8 +21,8 @@ function opt = get_option_preproc()
 
     opt.dir.roi = spm_file(fullfile(opt.dir.derivatives, 'cpp_spm-roi_acq-0p75'), 'cpath');
     opt.roi.name = {'IOG', 'OTS', 'ITG', ...
-                    'MTG', 'LOS', 'hMT', 'v1d', 'v2d', 'v3d', ...
-                    'v1v', 'v2v', 'v3v', 'mFus', 'pFus', 'CoS'};
+                    'MTG', 'LOS', 'hMT', 'v2d', 'v3d', ...
+                    'v2v', 'v3v', 'mFus', 'pFus', 'CoS'};
     % 'rh_TOS', 'lh_pOTS', 'lh_IOS'
     opt.roi.atlas = 'visfAtlas';
 
