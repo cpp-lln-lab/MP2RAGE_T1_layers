@@ -24,6 +24,7 @@ function intercept_ROI_and_brainmask(opt)
         filter.acq = 'r0p75'; % change depending on the pipeline
         filter.suffix = 'mask';
         filter.desc = 'brain';
+        filter.space = 'individual';
         binaryUNIT1 = bids.query(BIDS, 'data', filter);
         binaryUNIT1 = binaryUNIT1{:}; 
 
@@ -56,7 +57,7 @@ function intercept_ROI_and_brainmask(opt)
             outputT1map = fullfile(outDir, RoinameT1map);
             
             matlabbatch = {};
-            matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputsT1map, outputT1map, outDir, exp, 'int16');
+            matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputsT1map, outputT1map, outDir, exp, 'float32');
             matlabbatch{1}.spm.util.imcalc.options.interp = 0;
 
             batchName = 'Common Voxels ROIs and T1 binary mask';
@@ -66,7 +67,7 @@ function intercept_ROI_and_brainmask(opt)
             outputUNIT1 = fullfile(outDir, RoinameUNIT1);
             
             matlabbatch = {};
-            matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputsUNIT1, outputUNIT1, outDir, exp, 'int16');
+            matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputsUNIT1, outputUNIT1, outDir, exp, 'float32');
             matlabbatch{1}.spm.util.imcalc.options.interp = 0;
             
             batchName = 'Common Voxels ROIs and UNIT1 binary mask';
