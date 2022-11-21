@@ -9,6 +9,10 @@ opt = get_option_preproc();
 
 BIDS = bids.layout(opt.dir.output, 'use_schema', false);
 
+opt.roi.name = {'IOG', 'OTS', 'ITG', 'V1v', 'V1d', ...
+    'MTG', 'LOS', 'hMT', 'v2d', 'v3d',...
+    'v2v', 'v3v', 'mFus', 'pFus', 'CoS'};
+
 for subIdx = 1:numel(opt.subjects)
     
     subLabel = opt.subjects{subIdx};
@@ -29,6 +33,7 @@ for subIdx = 1:numel(opt.subjects)
     filter.suffix = 'mask';
     filter.prefix= '';
     filter.hemi = {'L', 'R'};
+    filter.label = opt.roi.name;
     filter.desc = ''; 
     listofROIs = bids.query(BIDS, 'data', filter);
     clear filter;
@@ -48,7 +53,7 @@ for subIdx = 1:numel(opt.subjects)
         outputT1map = fullfile(outDir, RoinameUNIT1);
         
         matlabbatch = {};
-        matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputsT1map, outputT1map, outDir, exp, 'int16');
+        matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputsT1map, outputT1map, outDir, exp, 'float32');
         matlabbatch{1}.spm.util.imcalc.options.interp = 0;
         
         batchName = 'Common Voxels ROIs and T1 binary maskS';
@@ -59,11 +64,11 @@ for subIdx = 1:numel(opt.subjects)
         outputT1map = fullfile(outDir, RoinameT1map);
         
         matlabbatch = {};
-        matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputsT1map, outputT1map, outDir, exp, 'int16');
+        matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputsT1map, outputT1map, outDir, exp, 'float32');
         matlabbatch{1}.spm.util.imcalc.options.interp = 0;
         
         batchName = 'Common Voxels ROIs and UNIT1 binary maskS';
         saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
-        
+%         
     end
 end
