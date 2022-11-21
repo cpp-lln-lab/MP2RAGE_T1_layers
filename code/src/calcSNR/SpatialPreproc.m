@@ -11,7 +11,7 @@ BIDS = bids.layout(opt.dir.preproc, ...
 
 filter.sub = opt.subjects;
 filter.modality = 'anat';
-filter.ses = '001';
+filter.ses = '005';
 filter.acq = 'r0p75';
 filter.suffix = 'UNIT1';
 filter.desc = '';
