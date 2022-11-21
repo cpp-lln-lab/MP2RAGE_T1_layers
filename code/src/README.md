@@ -8,44 +8,22 @@
         3. `laynii-layers`: 'git@gin.g-node.org:/marcobarilari/analysis_high-res_MP2RAGE-layers_derivatives_laynii.git'
         4. `raw`: 'git@gin.g-node.org:/RemiGau/V5_high-res_pilot-1_raw.git'
 
-** Create sibling for `bidsNighRes` because we could not do 'datalad get' in `inputs/bidsNighRes`. Issue to be fixed in the future. Sibling named 'local-copy'.
+** Create sibling for `bidsNighRes` because we could not get any dataset content with 'datalad get' in `inputs/bidsNighRes`. Issue to be fixed in the future. Sibling named 'local-copy'.
 
-Done for pilot001, pilot004 and pilot005:
-
-        1. Edit the subjects in `get_option_rois.m` to run `bidsCreateROI.m`
-
-        2. For each of the scripts or functions in `PipelineMP2RAGET1Layers.m`, the files were copied manually to `outputs/derivatives/cpp_spm-roi/sub-subLabel/ses-001/` (`.../anat/` or `.../roi/`)
-
-        3. Run part 1 of `PipelineMP2RAGET1Layers.m`
-
-        4. Plot relaxation profiles in the layers using `T1relax.R`.
-
-1.  Update `get_option_rois.m`
+1.  Edit the subjects in `get_option_rois.m` before running `bidsCreateROI.m`
 
 2. Manually copy files using the terminal: `copy -L path/to/file path/to/folder` (0p375mm UNIT1, Deformation field, Brain mask, Layers, T1 map)
 
 3. Run first part of `PipelineMP2RAGET1Layers.m`
 
+4. Plot relaxation profiles in the layers using `T1relax.R`.
+
 ## Log of steps
 1. Update `get_option_rois.m`:
 
-        Some defaults that might need to be changed:
-        - opt.subjects = {pilot001, pilot004, pilot005};
+        Change subject label in opt.subjects before running `bidsCreateROI.m` since this function does not run correctly for multiple subjects (to fix).
 
-        The next options were altered in the script `PipelineMP2RAGET1Layers.m` to run `bidsCreateROI.m`
-
-        - opt.subjects = {pilot001, pilot004, pilot005}; (one subject per run)
-        - opt.roi.atlas = 'wang';
-        - opt.roi.name = {'V1v', 'V1d'};
-
-        Changed to:
-
-        - opt.roi.atlas = 'visfAtlas';
-        - opt.roi.name = {'mFus', 'pFus', 'CoS'};
-
-        ** bidsCreateROI.m runs for all ROIs in the `group` folder -> to fix!
-
-2. Manually copied files using the terminal: `copy -L path/to/file path/to/folder` for each subject (if not done before, get the content of interest using the terminal: `datalad get 'path/to/file'`):
+2. Manually copy files using the terminal: `copy -L path/to/file path/to/folder` for each subject (if not done before, get the content of interest using the terminal: `datalad get 'path/to/file'`):
 
         Look for the following patterns in `inputs/cpp_spm-preproc/sub-'subLabel'/ses-001` and copy them to `outputs/derivatives/cpp_spm-roi/sub-'subLabel'/ses-001/roi`
 
@@ -61,53 +39,45 @@ Done for pilot001, pilot004 and pilot005:
 
             4. T1 map: `*acq-r0p375_desc-skullstripped_T1map.nii`
 
-3. Run script until `extractT1Layers.m`
+3. Run first part of `PipelineMP2RAGET1Layers.m` (Run until the script `extractT1Layers.m`)
         Ensure that the following variables were changed:
-
-                `resliceLayersToROi.m`:
+                `createBrainMaskT1map.m`:
                     filter.acq = 'r0p375';
-                `resliceRoiToBrainmask.m`:
-                    filter.label = {'V1d', 'V1v', 'v1v', 'v1d', 'pFus', 'mFus', 'CoS'};
                     filter.ses = '001';
-                    filter.acq = 'r0p375';
+
                 `intercept_ROI_and_brainmask.m`:
                     filter.ses = '001';
                     filter.acq = 'r0p375';
 
 
+
 # QUALITY CONTROL METRICS
+The quantitative assessment of MP2RAGE was performed for T1-weighted images (UNIT1) and T1 maps at raw resolution (0p75 mm). 
 
 ## Analysis steps
 
-0. Install the following subdataset in inputs:
+0. Ensure that the following subdatasets are installed in inputs:
+        1. `bidsNighres`: 'git@gin.g-node.org:/cpp_brewery/analysis_V5_high-res_pilot_nighres.git'
+        2. `raw`: 'git@gin.g-node.org:/RemiGau/V5_high-res_pilot-1_raw.git'
 
-        Freesurfer outputs: https://github.com/marcobarilari/analysis_high-res_pilot_freesurfer-laynii.git
+1. Update `get_option_preproc.m`.
 
-1. Create new folder inside `outputs/derivatives` called `cpp_spm-roi_acq-0p75`.
+2. Manually copy files using the terminal
 
-        SNR was estimated for pilot001, pilot004 and pilot005. Coefficient of variation was estimated for pilot004 and pilot005.
+3. Run Freesurfer segmentation for raw resolution
 
-2. Update `get_option_preproc.m`.
-
-3. Manually copy files using the terminal
-
-4. Convert `aseg.auto_noCCseg.mgz` to `aseg.auto_noCCseg.nii.gz` using `mri_convert_mgz.sh`
-
-5. Reslice `aseg.auto_noCCseg.nii.gz` to UNIT1 0.75 mm resolution and dimensions
-
-6. Run second part of `PipelineMP2RAGET1Layers.m` (quality control metrics)
+4. Run second part of `PipelineMP2RAGET1Layers.m` (quality control metrics)
 
 ## Log of steps
 
-2. Update `get_option_preproc.m`
+1. Update `get_option_preproc.m`
 
         Some defaults that might need to be changed:
 
             opt.bidsFilterFile.t1w.ses = '001'; (change for different sessions)
-            opt.subjects = {'pilot001', 'pilot004', 'pilot005'}; (delete pilot001 to run CoV)
+            opt.subjects = {'pilot001', 'pilot004', 'pilot005'};
 
-
-3. Manually copied files using the terminal: `copy -L path/to/file path/to/folder` for each subject from `inputs/raw/sub-'subLabel'/ses-''/anat/`
+2. Manually copied files using the terminal: `copy -L path/to/file path/to/folder` for each subject from `inputs/raw/sub-'subLabel'/ses-''/anat/`
 
         - UNIT1: `sub-'subLabel'_ses-001_acq-r0p75_UNIT1.nii`
 
@@ -115,41 +85,37 @@ Done for pilot001, pilot004 and pilot005:
 
         - T1 map: `sub-'subLabel'_ses-''_acq-r0p75_desc-skullstripped_T1map.nii`
 
-    and copy from `freesurfer/sub-'subLabel'/ses-001/anat/mri` for each subject:
+3.  Run Freesurfer segmentation for raw resolution
+    1. Convert `aseg.mgz` to `aseg.nii` using `mri_convert_mgz.sh`.
+             Change the paths in `mri_convert_mgz.sh` and run it.
+    2. Rename `aseg.nii` according to BIDS format to `sub-pilot001_ses-001_acq-r0p75_aseg.nii`
+    3. Reslice `sub-pilot001_ses-001_acq-r0p75_aseg.nii` to UNIT1 dimensions and orientations
 
-        - Segmentation map: `aseg.auto_noCCseg.mgz`
-
-    to `outputs/derivatives/cpp_spm-roi_acq-0p75/sub-'subLabel'/ses-''/anat` (if not done before, get the content of interest using the terminal: `datalad get 'path/to/file'`, for T1 map do `datalad unlock` since the coregistration will change the header of the file)
-
-4. Convert `aseg.auto_noCCseg.mgz` to `aseg.auto_noCCseg.nii.gz`using `mri_convert_mgz.sh`. Change the paths in this file and run it.
-
-6. Run second part of `PipelineMP2RAGET1Layers.m` (quality control metrics)
+4. Run second part of `PipelineMP2RAGET1Layers.m` (quality control metrics)
 
         Ensure that the following variables were changed:
 
             `SpatialPreproc.m`
                 filter.ses = '001'; (change for different sessions)
+                This script runs for the first anat file if finds, which is the file of interest for us (function `getAnatFilename`). to fix!
             `interceptUNIT1andBrainMask.m`:
                 filter.ses = '001';
-            `resliceRoiToBrainmask.m`:
-                filter.ses = '001';
-                filter.acq = 'r0p75'
-                comment filter.label
+            `createBrainMaskT1map.m`:
+                filter.acq = 'r0p75';
+                filter.ses = '001' %change this filter according to the % session of interest
+            `intercept_ROI_and_brainmask.m`:
+                filter.acq = 'r0p75';
             `resliceAsegAutoToUNIT1.m`
+                filter.acq = 'r0p75'
                 filter.ses = '001'
             `intercept_aseg_brainmask.m`
                 filter.ses = '001'
-            `createMaskCsfWmGmFromFreeSurferAseg.m`
-                - check that FreeSurfer map numbers are the following:
-                    CSF:24
+            `createMaskForegroundWMGMAseg.m`
+                Freesurfer WM and GM labels:
                     WM: 2(Left), 41 (Right)
                     GM: 3(Left), 42 (Right)
-            `extract_snr_from_roi.m`
-                filter.ses = '001'
-
-        SpatialPreproc: it runs for the first anat file if finds, which is the file of interest for us (function `getAnatFilename`). to fix!
 
     ### Log first steps done to estimate Signal loss
 
-            - download both 3d ex vivo brains in MNI space (0.5 mm resolution) from the database (Alkemade et al. 2022, DOI: 10.1126/sciadv.abj7892))
+            - Find 3d ex vivo brain in MNI space (0.5 mm resolution). Database: Alkemade et al. 2022, DOI: 10.1126/sciadv.abj7892)
             - Normalise both ex vivo MNI brains to pilot001 space and coregister, using the inverse normalisation parameters
