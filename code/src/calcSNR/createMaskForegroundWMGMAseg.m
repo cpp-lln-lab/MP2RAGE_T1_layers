@@ -103,7 +103,7 @@ for subIdx = 1:numel(opt.subjects)
     %% create foreground - WM + GM
     
     foreground = wm + gm;
-    ForegrdFilename = ['sub-' subLabel '_ses-001' '_space-individual_label-foreground_raseg.nii']
+    ForegrdFilename = ['sub-' subLabel '_ses-001' '_space-individual_label-GMandWM_raseg.nii']
     header_Foregrd = header_raseg;
     header_Foregrd.fname = fullfile(opt.dir.roi, ['sub-' subLabel], 'ses-001', 'roi', ForegrdFilename);
     header_Foregrd.private.dat.fname = header_Foregrd.fname;
