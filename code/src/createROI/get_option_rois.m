@@ -5,7 +5,7 @@ function opt = get_option_rois()
         opt = [];
     end
 
-    opt.subjects = {'pilot001', 'pilot004', 'pilot005'};
+    opt.subjects = {'pilot001'};
 
     opt.query.modality = 'anat';
     opt.query.ses = '001';
