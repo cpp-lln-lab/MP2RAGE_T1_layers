@@ -26,7 +26,7 @@ for subIdx = 1:numel(opt.subjects)
 
     sub1stSesUNIT1 = bids.query(BIDS, 'data', filters);
     sub1stSesUNIT1 = sub1stSesUNIT1{1};
-    
+
     filters.ses = '002';
     filters.prefix = '';
 
@@ -44,51 +44,50 @@ for subIdx = 1:numel(opt.subjects)
 
     T1map_001 = bids.query(BIDS, 'data', filter);
     T1map_001 = T1map_001{1};
-     
-    filter.ses = '002'; %change for other sessions    
+
+    filter.ses = '002'; % change for other sessions
 
     filter.ses = '002'; % change for other sessions
 
     T1map_002 = bids.query(BIDS, 'data', filter);
     T1map_002 = T1map_002{1};
-    clear filter
-    
+    clear filter;
+
     % find brain masks 001 and 002 sessions
     filter.sub = subLabel;
     filter.ses = '001';
     filter.space = 'individual';
-    filter.acq = 'r0p75'; %change depending on the pipeline
+    filter.acq = 'r0p75'; % change depending on the pipeline
     filter.suffix = 'mask';
     brainmask_001 = bids.query(BIDS, 'data', filter);
-    brainmask_001 = brainmask_001{:}; %because it complains: 'Struct contents reference from a non-struct array object.'
-    
+    brainmask_001 = brainmask_001{:}; % because it complains: 'Struct contents reference from a non-struct array object.'
+
     filter.ses = '002';
-    
+
     brainmask_002 = bids.query(BIDS, 'data', filter);
-    brainmask_002 = brainmask_002{:}; %because it complains: 'Struct contents reference from a non-struct array object.'
-    
+    brainmask_002 = brainmask_002{:}; % because it complains: 'Struct contents reference from a non-struct array object.'
+
     clear filter;
-    
+
     %% coregistration UNIT1s
     matlabbatch = {};
     matlabbatch = setBatchCoregistration(matlabbatch, opt, sub1stSesUNIT1, sub2stSesUNIT1);
 
     batchName = 'coregister_Ses001_ses002_UNIT1';
     saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
-        
+
     %% coregistration T1 maps
     matlabbatch = {};
     matlabbatch = setBatchCoregistration(matlabbatch, opt, T1map_001, T1map_002);
 
     batchName = 'coregister_Ses001_ses002_T1map';
     saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
-    
+
     %% coregistration brain masks
     matlabbatch = {};
     matlabbatch = setBatchCoregistration(matlabbatch, opt, brainmask_001, brainmask_002);
-    
+
     batchName = 'coregister_Ses001_ses002_brainmasks';
     saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
-  
-    
+
 end
