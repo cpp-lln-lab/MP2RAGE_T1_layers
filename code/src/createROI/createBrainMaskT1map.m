@@ -1,8 +1,6 @@
 function createBrainMaskT1map(opt)
 
-    opt.dir.roi = opt.dir.output;
-
-    BIDS = bids.layout(opt.dir.roi, 'use_schema', false);
+    BIDS = bids.layout(opt.dir.output, 'use_schema', false);
 
     for subIdx = 1:numel(opt.subjects)
 
@@ -11,24 +9,22 @@ function createBrainMaskT1map(opt)
 
         %% get T1 map
         filter.sub = subLabel;
-        filter.ses = '001'; % change depending on the pipeline
-        filter.acq = 'r0p75'; % change depending on the pipeline
+        filter.ses = opt.ses;
+        filter.acq = opt.acq;
         filter.desc = 'skullstripped';
         filter.suffix = 'T1map';
         filter.prefix = '';
         T1map = bids.query(BIDS, 'data', filter);
-        T1map = T1map{:}; 
-        
-        acq = filter.acq;
-        session = filter.ses;
+        assert(numel(T1map) == 1);
+        T1map = T1map{1};
         
         clear filter;
         
         exp = 'i1>0';
         % set batch image calculator
         input = {T1map};
-        outDir = fullfile(opt.dir.output, ['sub-' subLabel], ['ses-' session], 'anat');
-        nameMask = ['sub-' subLabel '_ses-' session '_acq-' acq '_desc-brainmask_T1map.nii'];
+        outDir = fullfile(opt.dir.output, ['sub-' subLabel], ['ses-' opt.ses], 'anat');
+        nameMask = ['sub-' subLabel '_ses-' opt.ses '_acq-' opt.acq '_desc-brainmask_T1map.nii'];
         output = fullfile(outDir, nameMask);
         matlabbatch = {};
         matlabbatch = setBatchImageCalculation(matlabbatch, opt, input, output, outDir, exp, 'float32');
