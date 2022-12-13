@@ -1,53 +1,47 @@
-% (C) Copyright 2021 Remi Gau
+function resliceLayersToRoi(opt)
 
-clear;
-clc;
+    BIDS = bids.layout(opt.dir.output, 'use_schema', false);
 
-run ../initEnv();
+    for subIdx = 1:numel(opt.subjects)
 
-opt = get_option_rois();
+        subLabel = opt.subjects{subIdx};
 
-opt.dryRun =  false;
+        %% get reference image
 
-BIDSref = bids.layout(opt.dir.output, 'use_schema', false);
-BIDSsrc = bids.layout(opt.dir.output, 'use_schema', false);
+        filter.sub = subLabel;
+        filter.suffix = 'UNIT1';
+        filter.modality = 'anat';
+        filter.space = 'individual';
+        filter.desc = 'skullstripped';
+        filter.acq = opt.acq;
 
-for subIdx = 1:numel(opt.subjects)
+        ref = bids.query(BIDS, 'data', filter);
+        assert(numel(ref) == 1);
+        ref = ref{1};
 
-    subLabel = opt.subjects{subIdx};
+        clear filter;
 
-    %% get reference image
+        %% get source image to reslice
 
-    filter.sub = subLabel;
-    filter.suffix = 'UNIT1';
-    filter.modality = 'anat';
-    filter.space = 'individual';
-    filter.desc = 'skullstripped';
-    filter.acq = 'r0p375';
+        filter.sub = subLabel;
+        filter.extension = '.nii';
+        filter.label = '6layerEquidist';
+        filter.prefix = '';
 
-    ref = bids.query(BIDSref, 'data', filter);
-    ref = ref{1};
+        layers = bids.query(BIDS, 'data', filter);
+        % should have one image only
+        assert(numel(layers) == 1);
+        layers = layers{1};
 
-    %% get source image to reslice
-    clear filter;
+        clear filter;
 
-    filter.sub = subLabel;
-    filter.extension = '.nii';
-    filter.label = '6layerEquidist';
-    filter.prefix = '';
+        %% reslice with nearest neighbour interpolation
+        interpolation = 0;
+        matlabbatch = {};
+        matlabbatch = setBatchReslice(matlabbatch, opt, ref, layers, interpolation);
 
-    layers = bids.query(BIDSsrc, 'data', filter);
-    % should have one image only
-    assert(numel(layers) == 1);
+        batchName = 'reslice_layers_to_UNIT1';
+        saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
 
-    clear filter;
-    
-    %% reslice with nearest neighbour interpolation
-    interpolation = 0;
-    matlabbatch = {};
-    matlabbatch = setBatchReslice(matlabbatch, opt, ref, layers, interpolation);
-
-    batchName = 'reslice_layers_to_UNIT1';
-    saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
-
+    end
 end
