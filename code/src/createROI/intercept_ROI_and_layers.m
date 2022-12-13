@@ -3,49 +3,56 @@ function intercept_ROI_and_layers(opt)
         opt = [];
     end
 
-    BIDSref = bids.layout(opt.dir.output, 'use_schema', false);
+    BIDS = bids.layout(opt.dir.output, 'use_schema', false);
 
-    for iSub = 1:numel(opt.subjects)
-        subLabel = opt.subjects{iSub};
-        printProcessingSubject(iSub, subLabel, opt);
+    for subIdx = 1:numel(opt.subjects)
+        
+        subLabel = opt.subjects{subIdx};
+        printProcessingSubject(subIdx, subLabel, opt);
 
         %% find resliced layers
         filter.sub = subLabel;
-        filter.acq = 'r0p375';
+        filter.acq = opt.acq;
         filter.space = 'individual';
         filter.prefix = 'r';
         filter.label = '6layerEquidist';
         filter.suffix = 'mask';
 
-        layers = bids.query(BIDSref, 'data', filter);
+        layers = bids.query(BIDS, 'data', filter);
+        assert(numel(layers) == 1);
         layers = layers {1};
 
         clear filter;
 
         %% find ROIs intercepted with T1 map binary mask
         filter.sub = subLabel;
-        filter.ses = '001';
+        filter.ses = opt.ses;
         filter.space = 'individual';
-        filter.label = {'V1d', 'V1v', 'pFus', 'mFus', 'CoS'};
+        filter.label = opt.roi.name;
         filter.suffix = 'mask';
         filter.desc = 'intercT1mapBin';
         filter.prefix = '';
 
-        listofRois = bids.query(BIDSref, 'data', filter);
+        listofRois = bids.query(BIDS, 'data', filter);
+        hdr = spm_vol(listofRois);
+
         clear filter;
+        
         [BIDS, opt] = setUpWorkflow(opt, 'intercept ROI and layers');
+        
         for ROIidx = 1:numel(listofRois)
-            Roiname = strcat(char(extractBetween(listofRois{ROIidx}, '\roi\', 'desc-')), 'desc-6layers_mask.nii');
-            session = char(extractBetween(listofRois{ROIidx}, '\ses-', '\roi\'));
-            Roi = char(extractBetween(listofRois{ROIidx}, ['\roi\sub-' subLabel '_ses-' session '_'], '_mask.nii'));
+            bf = bids.File(char(listofRois(ROIidx)));
+            ROIName = bf.entities.label;
+            bf.entities.desc = '6layers';
+
+            outputCommonVoxelsName = fullfile(spm_fileparts(hdr{ROIidx, 1}.fname), bf.filename);
             %% multiplication ROIs and layers
             exp = 'i1.*i2';
             % set batch image calculator
             input = {layers; listofRois{ROIidx}};
-            outDir = fullfile(opt.dir.output, ['sub-' subLabel '\ses-' session '\roi']);
-            outputCommonVoxels = fullfile(outDir, Roiname);
+            outDir = fullfile(opt.dir.output, ['sub-' subLabel], ['ses-' opt.ses], 'roi');
             matlabbatch = {};
-            matlabbatch = setBatchImageCalculation(matlabbatch, opt, input, outputCommonVoxels, outDir, exp, 'float32');
+            matlabbatch = setBatchImageCalculation(matlabbatch, opt, input, outputCommonVoxelsName, outDir, exp, 'float32');
             matlabbatch{1}.spm.util.imcalc.options.interp = 0;
 
             batchName = 'VoxelCount';
