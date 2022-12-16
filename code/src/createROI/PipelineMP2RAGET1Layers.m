@@ -1,21 +1,23 @@
 clear;
 clc;
 
+addpath(fullfile(pwd, '..'));
+initEnv();
+
 % -------------------------------------------------------------%
 % -------------------------T1 profile--------------------------%
 % -------------------------------------------------------------%
 
-addpath(fullfile(pwd, '..'));
-initEnv();
-
 opt = get_option_rois();
-
-% files copied manually, no need to run the next step:
-% bidsCopyInputFolder(opt, unzip);
 
 % Segmentation and skull stripping done previouslly, no need to run it:
 % bidsSegmentSkullStrip(opt);
 % -----------------------------------------------------------------------------------------------------------------------------------
+%% Define regions of interest and create them using CPP_ROI atlases in MNI space and move them to native space 
+% bidsCreateROI is a workflow in bidspm that uses CPP_ROI and marsbar to create 
+% a ROI in MNI space based on a given atlas
+% and inverse normalize those ROIs in native space
+
 opt.roi.name = {'V1v', 'V1d'};
 opt.roi.atlas = 'wang';
 bidsCreateROI(opt); % does not work for multiple subjects
@@ -24,18 +26,20 @@ opt.roi.name = {'mFus', 'pFus', 'CoS'};
 opt.roi.atlas = 'visfAtlas';
 bidsCreateROI(opt);
 
-run 'resliceLayersToRoi.m';
+%% Reslice the computationally defined cortical layers to UNIT1 dimensions and orientation
+resliceLayersToRoi(opt);
 
-resliceRoiToBrainmask(opt);
+createBrainMaskT1map(opt);
 
-intercept_ROI_and_brainmask(opt); % filter.acq = 'r0p375';
+opt.roi.name = {'V1v', 'V1d', 'pFus', 'mFus', 'CoS'};
+intercept_ROI_and_brainmask(opt);
 
 intercept_ROI_and_layers(opt);
-run 'createLayerMaskROIs.m';
+
+createLayerMaskROIs(opt);
+
 addpath(fullfile(pwd, '..', 'extractT1'));
-
-run 'ExtractT1Layers.m';
-
+ExtractT1Layers(opt);
 % -------------------------------------------------------------%
 %% -----------------------Quality control---------------------%
 %-----------------run this on the raw data--------------------%
@@ -43,22 +47,19 @@ run 'ExtractT1Layers.m';
 
 %%
 % -------------------------------------------------------------%
-%% SNR
-% to do:
-% copy files automatically script
-
-% -------------------------------------------------------------%
 clear opt;
 clear;
-opt = get_option_preproc();
-% if files are already there it will not overwrite
-run 'SpatialPreproc.m'; % change opt.bidsFilterFile.t1w.ses accordingly to the session you want to preprocess
 
-% this will run for the ROIs and atlas in the following option file
 addpath(fullfile(pwd, '..', 'calcSNR'));
 opt = get_option_preproc();
+matlabbatch = bidsGenerateT1map(opt);
 
-bidsCreateROI(opt);
+bidsSpatialPrepro(opt); % if files are already there it will not overwrite
+% change opt.bidsFilterFile.t1w.ses accordingly to the session you want to preprocess
+
+% after running the segmentation in FreeSurfer, run 'mri_convert_mgz.sh' to alter the segmentation file format;
+
+bidsCreateROI(opt); % this will run for the ROIs and atlas in the following option file
 
 % this will run for other ROIs in another atlas, so we define these options
 % again an run the script to create them
@@ -67,24 +68,32 @@ opt.roi.atlas = 'wang';
 bidsCreateROI(opt); % this function runs for all ROIs in the group folder
 % that contains the ROIs in MNI space
 
-% for session 2 changes options and run again the next 2 lines for CoV
-opt = get_option_preproc();
 interceptUNIT1andBrainMask(opt);
 
-resliceRoiToBrainmask(opt);
+createBrainMaskT1map(opt);
+
+opt.roi.name = {'IOG', 'OTS', 'ITG', ...
+                    'MTG', 'LOS', 'hMT', 'v2d', 'v3d', ...
+                    'v2v', 'v3v', 'mFus', 'pFus', 'CoS', 'V1v', 'V1d'};
 intercept_ROI_and_brainmask(opt);
-% copy aseg.auto from freesurfer outputs to derivatives/cpp_spm-roi-r0p75
 
-run 'resliceAsegAutoToUNIT1.m';
-run 'intercept_aseg_brainmask.m';
-run 'createMaskForegroundWMGMAseg.m';
+resliceAsegAutoToUNIT1(opt);
 
-run 'extract_snr_from_roi.m';
+addpath(fullfile(pwd, '../createROI'));
+createMaskForegroundWMGMAseg(opt);
+intercept_ROI_and_GM(opt);
+extract_snr_from_gm(opt);
+extract_snr_from_roi(opt);
 
 % -------------------------------------------------------------%
 %% Covariance
-
+addpath(fullfile(pwd, '..', 'calcSNR'));
+opt = get_option_preproc();
 addpath(fullfile(pwd, '..', 'calcCoV'));
-run 'CoregResliceses002UNIT1andT1map.m';
+CoregResliceses002UNIT1andT1map(opt); %just coregister, no reslice
 
-run 'calcCov.m';
+calcCov(opt);
+
+commonVoxelsROIsandSessions(opt);
+
+statsCoVROIs(opt);
