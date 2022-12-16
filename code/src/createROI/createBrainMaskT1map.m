@@ -7,7 +7,7 @@ function createBrainMaskT1map(opt)
         subLabel = opt.subjects{subIdx};
         fprintf('subject number: %d\n', subIdx);
 
-        %% get T1 map
+        %% get T1 map skullstripped
         filter.sub = subLabel;
         filter.ses = opt.ses;
         filter.acq = opt.acq;
