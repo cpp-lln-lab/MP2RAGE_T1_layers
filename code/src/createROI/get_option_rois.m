@@ -11,6 +11,9 @@ function opt = get_option_rois()
     opt.ses ='001';
     opt.acq = 'r0p375';
     opt.brainmask = 'label';
+    
+    opt.roi.name = {'V1v', 'V1d'};
+    opt.roi.atlas = 'wang';
 
     opt.query.modality = 'anat';
     opt.query.ses = '001';
