@@ -6,7 +6,7 @@ function intercept_ROI_and_layers(opt)
     BIDS = bids.layout(opt.dir.output, 'use_schema', false);
 
     for subIdx = 1:numel(opt.subjects)
-        
+
         subLabel = opt.subjects{subIdx};
         printProcessingSubject(subIdx, subLabel, opt);
 
@@ -37,9 +37,9 @@ function intercept_ROI_and_layers(opt)
         hdr = spm_vol(listofRois);
 
         clear filter;
-        
+
         [BIDS, opt] = setUpWorkflow(opt, 'intercept ROI and layers');
-        
+
         for ROIidx = 1:numel(listofRois)
             bf = bids.File(char(listofRois(ROIidx)));
             ROIName = bf.entities.label;

@@ -1,7 +1,7 @@
 function intercept_ROI_and_GM(opt)
 
     BIDS = bids.layout(opt.dir.output, 'use_schema', false);
-    
+
     for subIdx = 1:numel(opt.subjects)
 
         subLabel = opt.subjects{subIdx};
@@ -18,7 +18,7 @@ function intercept_ROI_and_GM(opt)
         hdrUNIT1 = spm_vol(listofROIsUNIT1);
 
         clear filter;
-        
+
         %% find ROIs T1 map
         filter.sub = subLabel;
         filter.suffix = 'mask';
@@ -29,7 +29,7 @@ function intercept_ROI_and_GM(opt)
 
         listofROIsT1map = bids.query(BIDS, 'data', filter);
         hdrT1map = spm_vol(listofROIsT1map);
-        
+
         clear filter;
         gm = spm_select('FPList', fullfile(opt.dir.roi, ['sub-' subLabel], ['ses-' opt.ses], 'roi'), strcat('^[^w].*ses-', opt.ses, '_space-individual_label-GM_raseg.nii$'));
 
@@ -43,10 +43,10 @@ function intercept_ROI_and_GM(opt)
 
             bf.entities.desc = 'intercUNIT1GM';
             RoiUNIT1CommonGM = fullfile(spm_fileparts(hdrUNIT1{ROIidx, 1}.fname), bf.filename);
-            
+
             bf.entities.desc = 'intercT1mapGM';
             RoiT1mapCommonGM = fullfile(spm_fileparts(hdrT1map{ROIidx, 1}.fname), bf.filename);
-            
+
             exp = 'i1.*i2';
             outDir = fullfile(opt.dir.output, ['sub-' subLabel], ['ses-' session], 'roi');
             %% set batch UNIT1

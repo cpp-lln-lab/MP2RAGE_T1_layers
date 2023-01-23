@@ -1,17 +1,16 @@
 function opt = get_option_rois()
     % returns a structure that contains the options chosen by the user ...
     ... to run the workflows that extract T1 laminar profile in occipital- ...
-    ... temporal regions
-    
+      % temporal regions
     if nargin < 1
         opt = [];
     end
 
     opt.subjects = {'pilot001'};
-    opt.ses ='001';
+    opt.ses = '001';
     opt.acq = 'r0p375';
     opt.brainmask = 'label';
-    
+
     opt.roi.name = {'V1v', 'V1d'};
     opt.roi.atlas = 'wang';
 

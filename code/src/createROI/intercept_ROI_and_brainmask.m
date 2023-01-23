@@ -15,8 +15,8 @@ function intercept_ROI_and_brainmask(opt)
         filter.desc = 'brainmask';
         binaryT1map = bids.query(BIDS, 'data', filter);
         assert(numel(binaryT1map) == 1);
-        binaryT1map = binaryT1map{:}; 
-        
+        binaryT1map = binaryT1map{:};
+
         clear filter;
         %% get UNIT1 binary mask
         filter.sub = subLabel;
@@ -27,7 +27,7 @@ function intercept_ROI_and_brainmask(opt)
         filter.space = 'individual';
         binaryUNIT1 = bids.query(BIDS, 'data', filter);
         assert(numel(binaryUNIT1) == 1);
-        binaryUNIT1 = binaryUNIT1{:}; 
+        binaryUNIT1 = binaryUNIT1{:};
 
         clear filter;
 
@@ -37,7 +37,7 @@ function intercept_ROI_and_brainmask(opt)
         filter.ses = opt.ses;
         filter.space = 'individual';
         filter.suffix = 'mask';
-        filter.prefix= '';
+        filter.prefix = '';
         filter.hemi = {'L', 'R'};
         filter.desc = '';
         filter.label = opt.roi.name;
@@ -50,16 +50,16 @@ function intercept_ROI_and_brainmask(opt)
             %% common voxels T1 maps - binary mask
             bfUNIT1 = bids.File(char(listofROIs(roi_idx)));
             bfT1map = bids.File(char(listofROIs(roi_idx)));
-            
+
             ROIName = bfUNIT1.entities.label;
-            
+
             bfUNIT1.entities.desc = 'intercUNIT1Bin';
             bfT1map.entities.desc = 'intercT1mapBin';
 
             ROIUNIT1output = fullfile(spm_fileparts(hdr{roi_idx, 1}.fname), bfUNIT1.filename);
             ROIT1mapoutput = fullfile(spm_fileparts(hdr{roi_idx, 1}.fname), bfT1map.filename);
 
-            exp = 'i1.*i2';            
+            exp = 'i1.*i2';
             outDir = fullfile(opt.dir.output, ['sub-' subLabel], ['ses-' opt.ses], 'roi');
             %% set batch T1 map
             inputsT1map = {binaryT1map; listofROIs{roi_idx}};
@@ -72,14 +72,14 @@ function intercept_ROI_and_brainmask(opt)
             saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
             %% set batch UNIT1
             inputsUNIT1 = {binaryUNIT1; listofROIs{roi_idx}};
-            
+
             matlabbatch = {};
             matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputsUNIT1, ROIUNIT1output, outDir, exp, 'float32');
             matlabbatch{1}.spm.util.imcalc.options.interp = 0;
-            
+
             batchName = 'Common Voxels ROIs and UNIT1 binary mask';
             saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
-            
-            end
+
+        end
     end
 end

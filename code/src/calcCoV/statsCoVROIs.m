@@ -6,13 +6,13 @@ function statsCoVROIs(opt)
         subLabel = opt.subjects{subIdx};
         %% statistics ROIs
 
-        %find CoV images
-        %unit1
-        UNIT1CoV = spm_select('FPList', fullfile(opt.dir.roi, ['sub-' subLabel]),...
-            strcat('^[^w].*cov-commonVoxSes', opt.ses, '_ses', opt.ses2, '_UNIT1.nii$'));
-        %T1map
-        T1mapCoV = spm_select('FPList', fullfile(opt.dir.roi, ['sub-' subLabel]),...
-            strcat('^[^w].*cov-commonVoxSes', opt.ses, '_ses', opt.ses2, '_T1map.nii$'));
+        % find CoV images
+        % unit1
+        UNIT1CoV = spm_select('FPList', fullfile(opt.dir.roi, ['sub-' subLabel]), ...
+                              strcat('^[^w].*cov-commonVoxSes', opt.ses, '_ses', opt.ses2, '_UNIT1.nii$'));
+        % T1map
+        T1mapCoV = spm_select('FPList', fullfile(opt.dir.roi, ['sub-' subLabel]), ...
+                              strcat('^[^w].*cov-commonVoxSes', opt.ses, '_ses', opt.ses2, '_T1map.nii$'));
         %% find ROIs UNIT1
         fprintf('subject number: %d\n', subIdx);
         filter.sub = subLabel;
@@ -20,14 +20,14 @@ function statsCoVROIs(opt)
         filter.desc = 'intercUNIT1SessionsBin';
         filter.label = opt.roi.name;
         filter.prefix = '';
-        filter.ses = opt.ses; 
+        filter.ses = opt.ses;
         filter.hemi = 'L';
 
         listofROIsUNIT1_L = bids.query(BIDS, 'data', filter);
 
         filter.hemi = 'R';
         listofROIsUNIT1_R = bids.query(BIDS, 'data', filter);
-        clear filter
+        clear filter;
 
         CovRoiUNIT1_L = struct();
         CovRoiUNIT1_R = struct();
@@ -38,11 +38,11 @@ function statsCoVROIs(opt)
             fprintf('ROI: %s', info_roi);
 
             CovRoiUNIT1_L.(info_roi) = spm_summarise(UNIT1CoV, listofROIsUNIT1_L{roi_idx});
-            CovRoiUNIT1_R.(info_roi) = spm_summarise(UNIT1CoV, listofROIsUNIT1_R{roi_idx});        
+            CovRoiUNIT1_R.(info_roi) = spm_summarise(UNIT1CoV, listofROIsUNIT1_R{roi_idx});
         end
 
         %% UNIT1 stats
-        %Left
+        % Left
         field_L = fieldnames(CovRoiUNIT1_L);
         meanCovRoiUNIT1_L = structfun(@mean, CovRoiUNIT1_L, 'uniform', 0);
         stdsUNIT1_L = structfun(@std, CovRoiUNIT1_L, 'uniform', 0);
@@ -59,7 +59,7 @@ function statsCoVROIs(opt)
         medianCovUNIT1_L = cell2mat(struct2cell(medianROIUNIT1_L));
         IqrROIUNIT1_L = struct2cell(iqrROIUNIT1_L);
 
-        %right
+        % right
         field_R = fieldnames(CovRoiUNIT1_R);
         meanCovRoiUNIT1_R = structfun(@mean, CovRoiUNIT1_R, 'uniform', 0);
         stdsUNIT1_R = structfun(@std, CovRoiUNIT1_R, 'uniform', 0);
@@ -81,11 +81,12 @@ function statsCoVROIs(opt)
         CovStatsUNIT1_R = table(field_R, MeanCovUNIT1_R, medianCovUNIT1_R, IqrROIUNIT1_R, StdCovUNIT1_R, nVoxelsUNIT1_R, MinUNIT1_R, MaxUNIT1_R);
 
         outputNameCovStatsUNIT1 = ['sub-' subLabel ...
-                                   '_ses' opt.ses 'ses' opt.ses2 '_acq-' opt.acq '_hemi-L_desc-covStatsROIs_UNIT1.tsv';...
+                                   '_ses' opt.ses 'ses' opt.ses2 '_acq-' opt.acq '_hemi-L_desc-covStatsROIs_UNIT1.tsv'; ...
                                    'sub-' subLabel ...
-                                   '_ses' opt.ses 'ses' opt.ses2 '_acq-' opt.acq '_hemi-R_desc-covStatsROIs_UNIT1.tsv'];        fileNameCovStatsUNIT1_L = fullfile(opt.dir.output, ['sub-' subLabel], outputNameCovStatsUNIT1(1,:));
+                                   '_ses' opt.ses 'ses' opt.ses2 '_acq-' opt.acq '_hemi-R_desc-covStatsROIs_UNIT1.tsv'];
+        fileNameCovStatsUNIT1_L = fullfile(opt.dir.output, ['sub-' subLabel], outputNameCovStatsUNIT1(1, :));
 
-        fileNameCovStatsUNIT1_R = fullfile(opt.dir.output, ['sub-' subLabel], outputNameCovStatsUNIT1(2,:));
+        fileNameCovStatsUNIT1_R = fullfile(opt.dir.output, ['sub-' subLabel], outputNameCovStatsUNIT1(2, :));
         bids.util.tsvwrite(fileNameCovStatsUNIT1_L, CovStatsUNIT1_L);
         bids.util.tsvwrite(fileNameCovStatsUNIT1_R, CovStatsUNIT1_R);
 
@@ -98,7 +99,7 @@ function statsCoVROIs(opt)
         filter.label = opt.roi.name;
         filter.prefix = '';
         filter.hemi = 'L';
-        filter.ses = opt.ses; 
+        filter.ses = opt.ses;
 
         listofROIsT1map_L = bids.query(BIDS, 'data', filter);
 
@@ -113,12 +114,12 @@ function statsCoVROIs(opt)
             bf = bids.File(char(listofROIsT1map_L(roi_idx)));
             info_roi = bf.entities.label;
             fprintf('ROI: %s', info_roi);
-            
+
             CovRoiT1map_L.(info_roi) = spm_summarise(T1mapCoV, listofROIsT1map_L{roi_idx});
             CovRoiT1map_R.(info_roi) = spm_summarise(T1mapCoV, listofROIsT1map_R{roi_idx});
         end
 
-        %LEFT
+        % LEFT
         meanCovRoiT1map_L = structfun(@mean, CovRoiT1map_L, 'uniform', 0);
         stdsT1map_L = structfun(@std, CovRoiT1map_L, 'uniform', 0);
         nVoxelsT1map_L = structfun(@numel, CovRoiT1map_L);
@@ -135,8 +136,7 @@ function statsCoVROIs(opt)
         MaxT1map_L = cell2mat(struct2cell(maxROIT1map_L));
         medianCovT1map_L = cell2mat(struct2cell(medianROIT1map_L));
 
-
-        %right
+        % right
         meanCovRoiT1map_R = structfun(@mean, CovRoiT1map_R, 'uniform', 0);
         stdsT1map_R = structfun(@std, CovRoiT1map_R, 'uniform', 0);
         nVoxelsT1map_R = structfun(@numel, CovRoiT1map_R);
@@ -157,12 +157,12 @@ function statsCoVROIs(opt)
         CovStatsT1map_R = table(field_R, MeanCovT1map_R, medianCovT1map_R, IqrROIT1map_R, StdCovT1map_R, nVoxelsT1map_R, MinT1map_R, MaxT1map_R);
 
         outputNameCovStatsT1map = ['sub-' subLabel ...
-                                   '_ses' opt.ses 'ses' opt.ses2 '_acq-' opt.acq '_hemi-L_desc-covStatsROIs_T1map.tsv';...
+                                   '_ses' opt.ses 'ses' opt.ses2 '_acq-' opt.acq '_hemi-L_desc-covStatsROIs_T1map.tsv'; ...
                                    'sub-' subLabel ...
                                    '_ses' opt.ses 'ses' opt.ses2 '_acq-' opt.acq '_hemi-R_desc-covStatsROIs_T1map.tsv'];
 
-        fileNameCovStatsT1map_L = fullfile(opt.dir.output, ['sub-' subLabel], outputNameCovStatsT1map(1,:));
-        fileNameCovStatsT1map_R = fullfile(opt.dir.output, ['sub-' subLabel], outputNameCovStatsT1map(2,:));    
+        fileNameCovStatsT1map_L = fullfile(opt.dir.output, ['sub-' subLabel], outputNameCovStatsT1map(1, :));
+        fileNameCovStatsT1map_R = fullfile(opt.dir.output, ['sub-' subLabel], outputNameCovStatsT1map(2, :));
         bids.util.tsvwrite(fileNameCovStatsT1map_L, CovStatsT1map_L);
         bids.util.tsvwrite(fileNameCovStatsT1map_R, CovStatsT1map_R);
     end

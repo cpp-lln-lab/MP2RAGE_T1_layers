@@ -14,7 +14,7 @@ function resliceAsegAutoToUNIT1(opt)
         filter.prefix = '';
         aseg = bids.query(BIDS, 'data', filter);
         assert(numel(aseg) == 1);
-        aseg = aseg{:}; 
+        aseg = aseg{:};
 
         %% select UNIT1
         filter.sub = subLabel;
@@ -24,7 +24,7 @@ function resliceAsegAutoToUNIT1(opt)
         filter.desc = 'intercBrainMask';
         UNIT1 = bids.query(BIDS, 'data', filter);
         assert(numel(UNIT1) == 1);
-        UNIT1 = UNIT1{:}; 
+        UNIT1 = UNIT1{:};
 
         clear filter;
 

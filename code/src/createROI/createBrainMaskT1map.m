@@ -17,9 +17,9 @@ function createBrainMaskT1map(opt)
         T1map = bids.query(BIDS, 'data', filter);
         assert(numel(T1map) == 1);
         T1map = T1map{1};
-        
+
         clear filter;
-        
+
         exp = 'i1>0';
         % set batch image calculator
         input = {T1map};
@@ -29,7 +29,7 @@ function createBrainMaskT1map(opt)
         matlabbatch = {};
         matlabbatch = setBatchImageCalculation(matlabbatch, opt, input, output, outDir, exp, 'float32');
         matlabbatch{1}.spm.util.imcalc.options.interp = 0;
-        
+
         batchName = 'Binary Mask T1 map';
         saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
     end

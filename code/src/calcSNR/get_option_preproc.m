@@ -18,10 +18,10 @@ function opt = get_option_preproc()
     opt.dir.preproc = opt.dir.output;
     opt.anatOnly = true;
     opt.skullstrip.threshold = 0.75;
-    
+
     opt.acq = 'r0p75';
     opt.ses = '001';
-    opt.ses2= '005'; % second session
+    opt.ses2 = '005'; % second session
     opt.brainmask = 'desc';
 
     opt.dir.roi = spm_file(fullfile(opt.dir.derivatives, 'cpp_spm-roi_acq-0p75'), 'cpath');

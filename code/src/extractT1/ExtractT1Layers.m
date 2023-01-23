@@ -19,7 +19,7 @@ function ExtractT1Layers(opt)
         filter.suffix = 'T1map';
         filter.acq = opt.acq;
         filter.desc = 'skullstripped';
-        
+
         T1map = bids.query(BIDS, 'data', filter);
         assert(numel(T1map) == 1);
         T1map = T1map{1};

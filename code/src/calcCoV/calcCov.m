@@ -15,7 +15,7 @@ function calcCov(opt)
         filter.prefix = '';
         filter.desc = 'intercBrainMask';
 
-        UNIT1_001 = bids.query(BIDS, 'data', filter);        
+        UNIT1_001 = bids.query(BIDS, 'data', filter);
         assert(numel(UNIT1_001) == 1);
         UNIT1_001 = UNIT1_001{:};
 
@@ -35,11 +35,11 @@ function calcCov(opt)
         filter.space = '';
         filter.prefix = '';
 
-        T1map_001 = bids.query(BIDS, 'data', filter);        
+        T1map_001 = bids.query(BIDS, 'data', filter);
         assert(numel(T1map_001) == 1);
         T1map_001 = T1map_001{:};
 
-        filter.ses = opt.ses2; 
+        filter.ses = opt.ses2;
 
         T1map_002 = bids.query(BIDS, 'data', filter);
         assert(numel(T1map_002) == 1);
@@ -50,12 +50,12 @@ function calcCov(opt)
         filter.sub = subLabel;
         filter.ses = opt.ses;
         filter.space = 'individual';
-        filter.acq = opt.acq; 
+        filter.acq = opt.acq;
         filter.suffix = 'mask';
         filter.prefix = '';
         brainmask_001 = bids.query(BIDS, 'data', filter);
         brainmask_001 = brainmask_001{:};
-        
+
         filter.ses = opt.ses2;
 
         brainmask_002 = bids.query(BIDS, 'data', filter);
@@ -79,14 +79,14 @@ function calcCov(opt)
         brainmaskT1map_002 = brainmaskT1map_002{:};
 
         clear filter;
-     %% common voxels UNIT1s - multiplication binary masks
+        %% common voxels UNIT1s - multiplication binary masks
 
         exp = 'i1.*i2';
         % set batch image calculator
         inputMaskT1maps = {brainmask_001; brainmask_002};
         outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
         outputMaskUNIT1 = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_desc-intercBinmasks_UNIT1s.nii']);
-        
+
         matlabbatch = {};
         matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputMaskT1maps, outputMaskUNIT1, outDir, exp, 'float32');
         matlabbatch{1}.spm.util.imcalc.options.interp = 0;
@@ -101,7 +101,7 @@ function calcCov(opt)
         inputMaskT1maps = {brainmaskT1map_001; brainmaskT1map_002};
         outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
         outputMaskT1map = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_desc-intercBinmasks_T1maps.nii']);
-        
+
         matlabbatch = {};
         matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputMaskT1maps, outputMaskT1map, outDir, exp, 'float32');
         matlabbatch{1}.spm.util.imcalc.options.interp = 0;
@@ -113,12 +113,12 @@ function calcCov(opt)
 
         expAbsdiff = 'abs(i1 - i2)';
         expMean = '(i1 + i2)./2';
-        Cov = '(i1 ./ i2).*100'; %i1 is expAbsdiff and i2 is expMean
+        Cov = '(i1 ./ i2).*100'; % i1 is expAbsdiff and i2 is expMean
 
         %% set batch image calculator - UNIT1
-        %expAbsdiff
+        % expAbsdiff
 
-        input = {UNIT1_001; UNIT1_002}; %i1, i2
+        input = {UNIT1_001; UNIT1_002}; % i1, i2
         outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
 
         outputDiff = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_absDiffSes' opt.ses '_ses' opt.ses2 '_UNIT1.nii']);
@@ -129,8 +129,8 @@ function calcCov(opt)
         batchName = 'AbsDiffUNIT1';
         saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
 
-        %expMean
-        input = {UNIT1_001; UNIT1_002}; %i1, i2
+        % expMean
+        input = {UNIT1_001; UNIT1_002}; % i1, i2
         outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
 
         outputMean = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_meanSes' opt.ses '_ses' opt.ses2 '_UNIT1.nii']);
@@ -141,8 +141,8 @@ function calcCov(opt)
         batchName = 'AbsDiffUNIT1';
         saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
 
-        %CoV
-        input = {outputDiff; outputMean}; %i1, i2
+        % CoV
+        input = {outputDiff; outputMean}; % i1, i2
         outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
 
         outputCoV = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_covSes' opt.ses '_ses' opt.ses2 '_UNIT1.nii']);
@@ -153,9 +153,9 @@ function calcCov(opt)
         batchName = 'CoVUNIT1';
         saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
 
-        %CoV common voxels
+        % CoV common voxels
         exp = 'i1.*i2';
-        input = {outputCoV; outputMaskUNIT1}; %i1, i2
+        input = {outputCoV; outputMaskUNIT1}; % i1, i2
         outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
 
         outputCommon = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_cov-commonVoxSes' opt.ses '_ses' opt.ses2 '_UNIT1.nii']);
@@ -168,9 +168,9 @@ function calcCov(opt)
 
         %% set batch image calculator - T1 map
 
-        %expAbsdiff
+        % expAbsdiff
 
-        input = {T1map_001; T1map_002}; %i1, i2
+        input = {T1map_001; T1map_002}; % i1, i2
         outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
 
         outputDiff = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_absDiffSes' opt.ses 'Ses' opt.ses2 '_T1map.nii']);
@@ -181,8 +181,8 @@ function calcCov(opt)
         batchName = 'AbsDiffT1map';
         saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
 
-        %expMean
-        input = {T1map_001; T1map_002}; %i1, i2
+        % expMean
+        input = {T1map_001; T1map_002}; % i1, i2
         outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
 
         outputMean = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_meanSes' opt.ses 'Ses' opt.ses2 '_T1map.nii']);
@@ -193,8 +193,8 @@ function calcCov(opt)
         batchName = 'AbsDiffT1map';
         saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
 
-        %CoV
-        input = {outputDiff; outputMean}; %i1, i2
+        % CoV
+        input = {outputDiff; outputMean}; % i1, i2
         outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
 
         outputCoV = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_covSes' opt.ses 'Ses' opt.ses2 '_T1map.nii']);
@@ -205,9 +205,9 @@ function calcCov(opt)
         batchName = 'CoVT1map';
         saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
 
-        %CoV common voxels
+        % CoV common voxels
         exp = 'i1.*i2';
-        input = {outputCoV; outputMaskT1map}; %i1, i2
+        input = {outputCoV; outputMaskT1map}; % i1, i2
         outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
 
         outputCommon = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_covCommonVoxSes' opt.ses 'Ses' opt.ses2 '_T1map.nii']);

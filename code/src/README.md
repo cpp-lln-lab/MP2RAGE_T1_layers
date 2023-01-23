@@ -52,7 +52,7 @@
 
 
 # QUALITY CONTROL METRICS
-The quantitative assessment of MP2RAGE was performed for T1-weighted images (UNIT1) and T1 maps at raw resolution (0p75 mm). 
+The quantitative assessment of MP2RAGE was performed for T1-weighted images (UNIT1) and T1 maps at raw resolution (0p75 mm).
 
 ## Analysis steps
 

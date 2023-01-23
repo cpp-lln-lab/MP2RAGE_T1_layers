@@ -1,5 +1,5 @@
 function extract_snr_from_gm(opt)
-    
+
     BIDS = bids.layout(opt.dir.output, 'use_schema', false);
 
     for subIdx = 1:numel(opt.subjects)
@@ -13,8 +13,8 @@ function extract_snr_from_gm(opt)
         filter.label = opt.roi.name;
         filter.hemi = 'L';
         filter.prefix = '';
-        filter.ses = opt.ses; 
-        
+        filter.ses = opt.ses;
+
         listofROIsUNIT1_L = bids.query(BIDS, 'data', filter);
 
         filter.hemi = 'R';
@@ -33,7 +33,7 @@ function extract_snr_from_gm(opt)
 
         listofROIsT1map_L = bids.query(BIDS, 'data', filter);
 
-        filter.hemi ='R';
+        filter.hemi = 'R';
         listofROIsT1map_R = bids.query(BIDS, 'data', filter);
 
         clear filter;
@@ -46,7 +46,7 @@ function extract_snr_from_gm(opt)
         filter.desc = 'intercBrainMask';
         UNIT1 = bids.query(BIDS, 'data', filter);
         assert(numel(UNIT1) == 1);
-        UNIT1 = UNIT1{:}; 
+        UNIT1 = UNIT1{:};
 
         %% change filters to find T1 map
 
@@ -55,7 +55,7 @@ function extract_snr_from_gm(opt)
         filter.space = '';
         T1map = bids.query(BIDS, 'data', filter);
         assert(numel(T1map) == 1);
-        T1map = T1map{:}; 
+        T1map = T1map{:};
 
         clear filter;
         %% find WM, GM and WMandGM
@@ -71,7 +71,7 @@ function extract_snr_from_gm(opt)
         nROIs = numel(listofROIsUNIT1_L);
 
         for roi_idx = 1:nROIs
-            
+
             bf = bids.File(char(listofROIsUNIT1_L(roi_idx)));
             info_roi = bf.entities.label;
 
@@ -84,7 +84,7 @@ function extract_snr_from_gm(opt)
         end
 
         field = fieldnames(signal_UNIT1_L);
-        %unit1
+        % unit1
         means_UNIT1_L = structfun(@mean, signal_UNIT1_L, 'uniform', 0);
         stds_UNIT1_L = structfun(@std, signal_UNIT1_L, 'uniform', 0);
         nVoxels_UNIT1_L = structfun(@numel, signal_UNIT1_L);
@@ -97,7 +97,7 @@ function extract_snr_from_gm(opt)
         minROI_UNIT1_R = structfun(@min, signal_UNIT1_R, 'uniform', 0);
         maxROI_UNIT1_R = structfun(@max, signal_UNIT1_R, 'uniform', 0);
 
-        %T1 MAP
+        % T1 MAP
 
         means_T1map_L = structfun(@mean, signal_T1map_L, 'uniform', 0);
         stds_T1map_L = structfun(@std, signal_T1map_L, 'uniform', 0);
@@ -118,11 +118,10 @@ function extract_snr_from_gm(opt)
 
         for k = 1:numel(field)
             SNR_UNIT1_L.(field{k}) = (means_UNIT1_L.(field{k}) / stds_UNIT1_L.(field{k})) * (numel(signal_UNIT1_L.(field{k})) / (numel(signal_UNIT1_L.(field{k})) - 1))^(1 / 2); % Oliveira et al. NeuroImage (2021)
-            SNR_UNIT1_R.(field{k}) = (means_UNIT1_R.(field{k}) / stds_UNIT1_R.(field{k})) * (numel(signal_UNIT1_R.(field{k})) / (numel(signal_UNIT1_R.(field{k})) - 1))^(1 / 2); % Oliveira et al. NeuroImage (2021)        
+            SNR_UNIT1_R.(field{k}) = (means_UNIT1_R.(field{k}) / stds_UNIT1_R.(field{k})) * (numel(signal_UNIT1_R.(field{k})) / (numel(signal_UNIT1_R.(field{k})) - 1))^(1 / 2); % Oliveira et al. NeuroImage (2021)
             SNR_T1map_L.(field{k}) = (means_T1map_L.(field{k}) / stds_T1map_L.(field{k})) * (numel(signal_T1map_L.(field{k})) / (numel(signal_T1map_L.(field{k})) - 1))^(1 / 2); % Oliveira et al. NeuroImage (2021)
             SNR_T1map_R.(field{k}) = (means_T1map_R.(field{k}) / stds_T1map_R.(field{k})) * (numel(signal_T1map_R.(field{k})) / (numel(signal_T1map_R.(field{k})) - 1))^(1 / 2); % Oliveira et al. NeuroImage (2021)
         end
-
 
         %% UNIT1
         MeanSignal_UNIT1_L = struct2cell(means_UNIT1_L);
@@ -156,19 +155,19 @@ function extract_snr_from_gm(opt)
         SNRStats_T1map_R = table(field, SNR_T1map_R, MeanSignal_T1map_R, StdSignal_T1map_R, nVoxels_T1map_R, Min_T1map_R, Max_T1map_R);
 
         outputNameSNRstatsUNIT1GM = ['sub-' subLabel ...
-                                   '_ses-' opt.ses '_acq-' opt.acq '_hemi-L_desc-SNRStatsROIsGM_UNIT1.tsv';...
-                                   'sub-' subLabel ...
-                                   '_ses-' opt.ses '_acq-' opt.acq '_hemi-R_desc-SNRStatsROIsGM_UNIT1.tsv'];
+                                     '_ses-' opt.ses '_acq-' opt.acq '_hemi-L_desc-SNRStatsROIsGM_UNIT1.tsv'; ...
+                                     'sub-' subLabel ...
+                                     '_ses-' opt.ses '_acq-' opt.acq '_hemi-R_desc-SNRStatsROIsGM_UNIT1.tsv'];
         outputNameSNRstatsT1mapGM = ['sub-' subLabel ...
-                                   '_ses-' opt.ses '_acq-' opt.acq '_hemi-L_desc-SNRStatsROIsGM_T1map.tsv'; ...
-                                   'sub-' subLabel ...
-                                   '_ses-' opt.ses '_acq-' opt.acq '_hemi-R_desc-SNRStatsROIsGM_T1map.tsv'];
+                                     '_ses-' opt.ses '_acq-' opt.acq '_hemi-L_desc-SNRStatsROIsGM_T1map.tsv'; ...
+                                     'sub-' subLabel ...
+                                     '_ses-' opt.ses '_acq-' opt.acq '_hemi-R_desc-SNRStatsROIsGM_T1map.tsv'];
 
-        fileNameSNRstatsUNIT1_L = fullfile(opt.dir.output, ['sub-' subLabel], ['ses-' opt.ses], 'anat', outputNameSNRstatsUNIT1GM(1,:));
-        fileNameSNRstatsUNIT1_R = fullfile(opt.dir.output, ['sub-' subLabel], ['ses-' opt.ses], 'anat', outputNameSNRstatsUNIT1GM(2,:));
+        fileNameSNRstatsUNIT1_L = fullfile(opt.dir.output, ['sub-' subLabel], ['ses-' opt.ses], 'anat', outputNameSNRstatsUNIT1GM(1, :));
+        fileNameSNRstatsUNIT1_R = fullfile(opt.dir.output, ['sub-' subLabel], ['ses-' opt.ses], 'anat', outputNameSNRstatsUNIT1GM(2, :));
 
-        fileNameSNRstatsT1map_L = fullfile(opt.dir.output, ['sub-' subLabel], ['ses-' opt.ses], 'anat', outputNameSNRstatsT1mapGM(1,:));
-        fileNameSNRstatsT1map_R = fullfile(opt.dir.output, ['sub-' subLabel], ['ses-' opt.ses], 'anat', outputNameSNRstatsT1mapGM(2,:));
+        fileNameSNRstatsT1map_L = fullfile(opt.dir.output, ['sub-' subLabel], ['ses-' opt.ses], 'anat', outputNameSNRstatsT1mapGM(1, :));
+        fileNameSNRstatsT1map_R = fullfile(opt.dir.output, ['sub-' subLabel], ['ses-' opt.ses], 'anat', outputNameSNRstatsT1mapGM(2, :));
 
         bids.util.tsvwrite(fileNameSNRstatsUNIT1_L, SNRStats_UNIT1_L);
         bids.util.tsvwrite(fileNameSNRstatsUNIT1_R, SNRStats_UNIT1_R);

@@ -16,17 +16,17 @@ function CoregResliceses002UNIT1andT1map(opt)
         filter.prefix = '';
         filter.desc = 'intercBrainMask';
 
-        UNIT1_001 = bids.query(BIDS, 'data', filter);        
+        UNIT1_001 = bids.query(BIDS, 'data', filter);
         assert(numel(UNIT1_001) == 1);
         UNIT1_001 = UNIT1_001{:};
-        
+
         filter.ses = opt.ses2;
         filter.prefix = '';
 
         UNIT1_002 = bids.query(BIDS, 'data', filter);
         assert(numel(UNIT1_002) == 1);
         UNIT1_002 = UNIT1_002{:};
-        
+
         %% find T1 map 2 sessions
         filter.sub = subLabel;
         filter.acq = opt.acq;
@@ -36,28 +36,28 @@ function CoregResliceses002UNIT1andT1map(opt)
         filter.space = '';
         filter.prefix = '';
 
-        T1map_001 = bids.query(BIDS, 'data', filter);        
+        T1map_001 = bids.query(BIDS, 'data', filter);
         assert(numel(T1map_001) == 1);
         T1map_001 = T1map_001{:};
-        
+
         filter.ses = opt.ses2;
 
         T1map_002 = bids.query(BIDS, 'data', filter);
         assert(numel(T1map_002) == 1);
         T1map_002 = T1map_002{:};
-        
-        clear filter
+
+        clear filter;
 
         %% find brain masks UNIT1 2 sessions
         filter.sub = subLabel;
         filter.ses = opt.ses;
         filter.space = 'individual';
-        filter.acq = opt.acq; 
+        filter.acq = opt.acq;
         filter.suffix = 'mask';
         brainmaskUNIT1_001 = bids.query(BIDS, 'data', filter);
         assert(numel(brainmaskUNIT1_001) == 1);
         brainmaskUNIT1_001 = brainmaskUNIT1_001{:};
-        
+
         filter.ses = opt.ses2;
 
         brainmaskUNIT1_002 = bids.query(BIDS, 'data', filter);
@@ -70,20 +70,20 @@ function CoregResliceses002UNIT1andT1map(opt)
 
         filter.sub = subLabel;
         filter.ses = opt.ses;
-        filter.acq = opt.acq; 
+        filter.acq = opt.acq;
         filter.suffix = 'T1map';
         filter.desc = 'brainmask';
-        
+
         brainmaskT1map_001 = bids.query(BIDS, 'data', filter);
         assert(numel(brainmaskT1map_001) == 1);
         brainmaskT1map_001 = brainmaskT1map_001{:};
-        
+
         filter.ses = opt.ses2;
 
         brainmaskT1map_002 = bids.query(BIDS, 'data', filter);
         assert(numel(brainmaskT1map_002) == 1);
         brainmaskT1map_002 = brainmaskT1map_002{:};
-        
+
         clear filter;
         %% coregistration UNIT1s
         matlabbatch = {};
