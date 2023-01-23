@@ -8,44 +8,88 @@ function interceptUNIT1andBrainMask(opt)
         %% get brain mask
         filter.modality = 'anat';
         filter.sub = subLabel;
-        filter.ses = '001';    % change accordingly to the session
+        filter.ses = opt.bidsFilterFile.t1w.ses;    % change accordingly to the session
         filter.space = 'individual';
-        % filter.acq = 'r0p75';
+        filter.acq = opt.acq;
         filter.suffix = 'mask';
         brainmask = bids.query(BIDS, 'data', filter);
-        brainmask = brainmask{:}; % because it complains: 'Struct contents reference from a non-struct array object.'
-
-        session = filter.ses;
+        assert(numel(brainmask) == 1);
+        brainmask = brainmask{:};
 
         clear filter;
-
-        Headerbrainmask = spm_vol(brainmask);
-        Brainmask = spm_read_vols(Headerbrainmask);
 
         %% get UNIT1
         filter.sub = subLabel;
         filter.suffix = 'UNIT1';
-        filter.ses = '001';    % change accordingly to the session
+        filter.ses = opt.bidsFilterFile.t1w.ses;    % change accordingly to the session
         filter.desc = '';
         filter.space = '';
         UNIT1 = bids.query(BIDS, 'data', filter);
-        UNIT1 = UNIT1{:}; % because it complains: 'Struct contents reference from a non-struct array object.'
+        assert(numel(UNIT1) == 1);
+        UNIT1 = UNIT1{:};
 
         clear filter;
 
-        HeaderUNIT1 = spm_vol(UNIT1);
-        Unit1 = spm_read_vols(HeaderUNIT1);
+        %% get t1 map
+        filter.sub = subLabel;
+        filter.suffix = 'T1map';
+        filter.ses = opt.bidsFilterFile.t1w.ses;    % change accordingly to the session
+        filter.desc = '';
+        filter.space = '';
+        T1map = bids.query(BIDS, 'data', filter);
+        assert(numel(T1map) == 1);
+        T1map = T1map{:};
 
-        UNIT1Skullstripped = Brainmask .* Unit1;
+        clear filter;
 
-        HeaderUNIT1Skullstripped = HeaderUNIT1;
-        HeaderUNIT1Skullstripped.fname = fullfile([HeaderUNIT1.fname(1:end - 9) 'desc-intercBrainMask_UNIT1.nii']);  % This is where you fill in the new filename
+        %% set batch
+        % UNIT1 no bias
+        NoBias = fullfile(['sub-' subLabel '_ses-' char(opt.bidsFilterFile.t1w.ses) '_acq-' char(opt.acq) '_desc-intercBrainMask_UNIT1.nii']);
+        exp = 'i1.*i2';
 
-        HeaderUNIT1Skullstripped.private.dat.fname = HeaderUNIT1Skullstripped.fname;  % This just replaces the old filename in another location within the header.
+        % set batch image calculator
+        inputs = {char(brainmask); char(UNIT1)};
+        outDir = fullfile(opt.dir.output, ['sub-' subLabel], ['ses-' char(opt.bidsFilterFile.t1w.ses)], 'anat');
+        output = fullfile(outDir, NoBias);
 
-        % Step 2.  Now use spm_write_vol to write out the new data.
-        %          You need to give spm_write_vol the new header information and corresponding data matrix
-        spm_write_vol(HeaderUNIT1Skullstripped, UNIT1Skullstripped);  % where HeaderInfo is your header information for the new file, and Data is the image matrix corresponding to the image you'll be writing out.
+        matlabbatch = {};
+        matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputs, output, outDir, exp, 'float32');
+        matlabbatch{1}.spm.util.imcalc.options.interp = 0;
+
+        batchName = 'Common Voxels brainmask and UNIT1';
+        saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+
+        %% T1map - skullstripped
+        T1mapSkullstripped = fullfile(['sub-' subLabel '_ses-' char(opt.bidsFilterFile.t1w.ses) '_acq-' opt.acq '_desc-skullstripped_T1map.nii']);
+        exp = 'i1.*i2';
+
+        % set batch image calculator
+        inputs = {char(brainmask); char(T1map)};
+        outDir = fullfile(opt.dir.output, ['sub-' subLabel], ['ses-' char(opt.bidsFilterFile.t1w.ses)], 'anat');
+        output = fullfile(outDir, T1mapSkullstripped);
+
+        matlabbatch = {};
+        matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputs, output, outDir, exp, 'float32');
+        matlabbatch{1}.spm.util.imcalc.options.interp = 0;
+
+        batchName = 'Common Voxels brainmask and T1map';
+        saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+
+        %% save brain mask as T1 map binary mask
+        T1binmask = fullfile(['sub-' subLabel '_ses-' char(opt.bidsFilterFile.t1w.ses) '_acq-' opt.acq '_desc-brainmask_T1map.nii']);
+        exp = 'i1>0';
+        % set batch image calculator
+
+        inputs = {output};
+        outDir = fullfile(opt.dir.output, ['sub-' subLabel], ['ses-' char(opt.bidsFilterFile.t1w.ses)], 'anat');
+        output = fullfile(outDir, T1binmask);
+
+        matlabbatch = {};
+        matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputs, output, outDir, exp, 'float32');
+        matlabbatch{1}.spm.util.imcalc.options.interp = 0;
+
+        batchName = 'T1 map bin mask';
+        saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
     end
 
 end

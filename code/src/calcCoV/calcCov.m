@@ -1,176 +1,222 @@
-clear;
-clc;
+function calcCov(opt)
 
-addpath(fullfile(pwd, '..'));
-initEnv();
+    BIDS = bids.layout(opt.dir.output, 'use_schema', false);
 
-addpath(fullfile(pwd, '../calcSNR'));
-opt = get_option_preproc();
+    for subIdx = 1:numel(opt.subjects)
 
-BIDS = bids.layout(opt.dir.output, 'use_schema', false);
+        subLabel = opt.subjects{subIdx};
+        fprintf('subject number: %d\n', subIdx);
+        %% find UNIT1 2 sessions
+        filter.sub = subLabel;
+        filter.ses = opt.ses;
+        filter.modality = 'anat';
+        filter.acq = opt.acq;
+        filter.suffix = 'UNIT1';
+        filter.prefix = '';
+        filter.desc = 'intercBrainMask';
 
-for subIdx = 1:numel(opt.subjects)
+        UNIT1_001 = bids.query(BIDS, 'data', filter);
+        assert(numel(UNIT1_001) == 1);
+        UNIT1_001 = UNIT1_001{:};
 
-    subLabel = opt.subjects{subIdx};
-    fprintf('subject number: %d\n', subIdx);
-    %% find UNIT1 sess 001 and 002
-    filters.sub = subLabel;
-    filters.ses = '001';
-    filters.modality = 'anat';
-    filters.acq = 'r0p75';
-    filters.suffix = 'UNIT1';
-    filters.prefix = '';
-    filters.desc = 'intercBrainMask';
+        filter.ses = opt.ses2;
+        filter.prefix = '';
 
-    sub1stSesUNIT1 = bids.query(BIDS, 'data', filters);
-    sub1stSesUNIT1 = sub1stSesUNIT1{1};
+        UNIT1_002 = bids.query(BIDS, 'data', filter);
+        assert(numel(UNIT1_002) == 1);
+        UNIT1_002 = UNIT1_002{:};
 
-    filters.ses = '002';
-    filters.prefix = '';
+        %% find T1 map 2 sessions
+        filter.sub = subLabel;
+        filter.acq = opt.acq;
+        filter.ses = opt.ses;
+        filter.suffix = 'T1map';
+        filter.desc = 'skullstripped';
+        filter.space = '';
+        filter.prefix = '';
 
-    sub2ndSesUNIT1 = bids.query(BIDS, 'data', filters);
-    sub2ndSesUNIT1 = sub2ndSesUNIT1{1};
+        T1map_001 = bids.query(BIDS, 'data', filter);
+        assert(numel(T1map_001) == 1);
+        T1map_001 = T1map_001{:};
 
-    %% find T1 map 001 and 002 sessions
-    filter.sub = subLabel;
-    filter.acq = 'r0p75';
-    filter.ses = '001';
-    filter.suffix = 'T1map';
-    filter.desc = 'skullstripped';
-    filter.space = '';
-    filter.prefix = '';
+        filter.ses = opt.ses2;
 
-    T1map_001 = bids.query(BIDS, 'data', filter);
-    T1map_001 = T1map_001{1};
+        T1map_002 = bids.query(BIDS, 'data', filter);
+        assert(numel(T1map_002) == 1);
+        T1map_002 = T1map_002{:};
 
-    filter.ses = '002'; % change for other sessions
+        clear filter;
+        %% find brain UNIT1 masks 2 sessions
+        filter.sub = subLabel;
+        filter.ses = opt.ses;
+        filter.space = 'individual';
+        filter.acq = opt.acq;
+        filter.suffix = 'mask';
+        filter.prefix = '';
+        brainmask_001 = bids.query(BIDS, 'data', filter);
+        brainmask_001 = brainmask_001{:};
 
-    T1map_002 = bids.query(BIDS, 'data', filter);
-    T1map_002 = T1map_002{1};
+        filter.ses = opt.ses2;
 
-    clear filter;
+        brainmask_002 = bids.query(BIDS, 'data', filter);
+        brainmask_002 = brainmask_002{:};
 
-    %% common voxels T1 maps - binary mask
+        clear filter;
+        %% find T1 binary masks 2 sessions
 
-    exp = '(i1.*i2)>0.0';
-    % set batch image calculator
-    inputMaskT1maps = {T1map_001; T1map_002};
-    outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
-    outputMask = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-r0p75_desc-BinaryMask_T1maps.nii']);
-    matlabbatch = {};
-    matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputMaskT1maps, outputMask, outDir, exp, 'uint8');
+        filter.sub = subLabel;
+        filter.ses = opt.ses;
+        filter.acq = opt.acq;
+        filter.suffix = 'T1map';
+        filter.prefix = '';
+        filter.desc = 'brainmask';
+        brainmaskT1map_001 = bids.query(BIDS, 'data', filter);
+        brainmaskT1map_001 = brainmaskT1map_001{:};
 
-    batchName = 'binaryMaskT1maps';
-    saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+        filter.ses = opt.ses2;
 
-    %% find brain UNIT1 masks 001 and 002 sessions
-    filter.sub = subLabel;
-    filter.ses = '001';
-    filter.space = 'individual';
-    filter.acq = 'r0p75'; % change depending on the pipeline
-    filter.suffix = 'mask';
-    brainmask_001 = bids.query(BIDS, 'data', filter);
-    brainmask_001 = brainmask_001{:}; % because it complains: 'Struct contents reference from a non-struct array object.'
+        brainmaskT1map_002 = bids.query(BIDS, 'data', filter);
+        brainmaskT1map_002 = brainmaskT1map_002{:};
 
-    filter.ses = '002';
+        clear filter;
+        %% common voxels UNIT1s - multiplication binary masks
 
-    brainmask_002 = bids.query(BIDS, 'data', filter);
-    brainmask_002 = brainmask_002{:}; % because it complains: 'Struct contents reference from a non-struct array object.'
+        exp = 'i1.*i2';
+        % set batch image calculator
+        inputMaskT1maps = {brainmask_001; brainmask_002};
+        outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
+        outputMaskUNIT1 = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_desc-intercBinmasks_UNIT1s.nii']);
 
-    clear filter;
-    %% find T1 binary mask
+        matlabbatch = {};
+        matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputMaskT1maps, outputMaskUNIT1, outDir, exp, 'float32');
+        matlabbatch{1}.spm.util.imcalc.options.interp = 0;
 
-    T1mapsmask = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-r0p75_desc-BinaryMask_T1maps.nii']);
-    T1mapsmask = T1mapsmask;
-    %% CoV operations
+        batchName = 'binaryMaskT1maps';
+        saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
 
-    exp = '((abs(i1 - i2))./((i1 + i2)/2)).*i3.*i4.*i5';
-    % set batch image calculator - UNIT1
-    inputCovUNIT1 = {sub1stSesUNIT1; sub2ndSesUNIT1; brainmask_001; brainmask_002; T1mapsmask};
-    outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
-    outputUNIT1 = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-r0p75_CovarianceSes001Ses002_UNIT1.nii']);
-    matlabbatch = {};
-    matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputCovUNIT1, outputUNIT1, outDir, exp, 'uint8');
+        %% common voxels T1 maps - multiplication binary masks
 
-    batchName = 'Cov_UNIT1';
-    saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+        exp = 'i1.*i2';
+        % set batch image calculator
+        inputMaskT1maps = {brainmaskT1map_001; brainmaskT1map_002};
+        outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
+        outputMaskT1map = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_desc-intercBinmasks_T1maps.nii']);
 
-    % set batch image calculator - T1 map
-    inputCovT1map = {T1map_001; T1map_002; brainmask_001; brainmask_002; T1mapsmask};
-    outputT1map = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-r0p75_CovarianceSes001Ses002_T1map.nii']);
-    matlabbatch = {};
-    matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputCovT1map, outputT1map, outDir, exp, 'uint8');
+        matlabbatch = {};
+        matlabbatch = setBatchImageCalculation(matlabbatch, opt, inputMaskT1maps, outputMaskT1map, outDir, exp, 'float32');
+        matlabbatch{1}.spm.util.imcalc.options.interp = 0;
 
-    batchName = 'Cov_T1map';
-    saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+        batchName = 'binaryMaskT1maps';
+        saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
 
-    clear filters;
+        %% CoV expressions
 
-    filters.sub = subLabel;
-    filters.suffix = {'mask'};
-    filters.desc = 'intercMasks';
-    filters.atlas = {'visfAtlas', 'wang'};
-    filters.prefix = 'r';
-    list_of_rois = bids.query(BIDS, 'data', filters);
+        expAbsdiff = 'abs(i1 - i2)';
+        expMean = '(i1 + i2)./2';
+        Cov = '(i1 ./ i2).*100'; % i1 is expAbsdiff and i2 is expMean
 
-    CovRoiUNIT1 = struct();
-    CovRoiT1map = struct();
+        %% set batch image calculator - UNIT1
+        % expAbsdiff
 
-    clear filters;
-    clear filter;
-    for roi_idx = 1:numel(list_of_rois)
+        input = {UNIT1_001; UNIT1_002}; % i1, i2
+        outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
 
-        info_roi = char(extractBetween(list_of_rois(roi_idx), 'hemi-', '_desc-intercMasks_mask.nii'));
-        info_roi_struct = strrep(info_roi, '-', ''); % '-' was giving problems when naming the fields in structure
-        fprintf('ROI: %s', info_roi);
+        outputDiff = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_absDiffSes' opt.ses '_ses' opt.ses2 '_UNIT1.nii']);
+        matlabbatch = {};
+        matlabbatch = setBatchImageCalculation(matlabbatch, opt, input, outputDiff, outDir, expAbsdiff, 'float32');
+        matlabbatch{1}.spm.util.imcalc.options.interp = 0;
 
-        CovRoiUNIT1.(info_roi_struct) = spm_summarise(outputUNIT1, list_of_rois{roi_idx});
-        CovRoiT1map.(info_roi_struct) = spm_summarise(outputT1map, list_of_rois{roi_idx});
+        batchName = 'AbsDiffUNIT1';
+        saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+
+        % expMean
+        input = {UNIT1_001; UNIT1_002}; % i1, i2
+        outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
+
+        outputMean = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_meanSes' opt.ses '_ses' opt.ses2 '_UNIT1.nii']);
+        matlabbatch = {};
+        matlabbatch = setBatchImageCalculation(matlabbatch, opt, input, outputMean, outDir, expMean, 'float32');
+        matlabbatch{1}.spm.util.imcalc.options.interp = 0;
+
+        batchName = 'AbsDiffUNIT1';
+        saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+
+        % CoV
+        input = {outputDiff; outputMean}; % i1, i2
+        outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
+
+        outputCoV = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_covSes' opt.ses '_ses' opt.ses2 '_UNIT1.nii']);
+        matlabbatch = {};
+        matlabbatch = setBatchImageCalculation(matlabbatch, opt, input, outputCoV, outDir, Cov, 'float32');
+        matlabbatch{1}.spm.util.imcalc.options.interp = 0;
+
+        batchName = 'CoVUNIT1';
+        saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+
+        % CoV common voxels
+        exp = 'i1.*i2';
+        input = {outputCoV; outputMaskUNIT1}; % i1, i2
+        outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
+
+        outputCommon = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_cov-commonVoxSes' opt.ses '_ses' opt.ses2 '_UNIT1.nii']);
+        matlabbatch = {};
+        matlabbatch = setBatchImageCalculation(matlabbatch, opt, input, outputCommon, outDir, exp, 'float32');
+        matlabbatch{1}.spm.util.imcalc.options.interp = 0;
+
+        batchName = 'CoV-CommonVoxelsUNI1';
+        saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+
+        %% set batch image calculator - T1 map
+
+        % expAbsdiff
+
+        input = {T1map_001; T1map_002}; % i1, i2
+        outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
+
+        outputDiff = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_absDiffSes' opt.ses 'Ses' opt.ses2 '_T1map.nii']);
+        matlabbatch = {};
+        matlabbatch = setBatchImageCalculation(matlabbatch, opt, input, outputDiff, outDir, expAbsdiff, 'float32');
+        matlabbatch{1}.spm.util.imcalc.options.interp = 0;
+
+        batchName = 'AbsDiffT1map';
+        saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+
+        % expMean
+        input = {T1map_001; T1map_002}; % i1, i2
+        outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
+
+        outputMean = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_meanSes' opt.ses 'Ses' opt.ses2 '_T1map.nii']);
+        matlabbatch = {};
+        matlabbatch = setBatchImageCalculation(matlabbatch, opt, input, outputMean, outDir, expMean, 'float32');
+        matlabbatch{1}.spm.util.imcalc.options.interp = 0;
+
+        batchName = 'AbsDiffT1map';
+        saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+
+        % CoV
+        input = {outputDiff; outputMean}; % i1, i2
+        outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
+
+        outputCoV = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_covSes' opt.ses 'Ses' opt.ses2 '_T1map.nii']);
+        matlabbatch = {};
+        matlabbatch = setBatchImageCalculation(matlabbatch, opt, input, outputCoV, outDir, Cov, 'float32');
+        matlabbatch{1}.spm.util.imcalc.options.interp = 0;
+
+        batchName = 'CoVT1map';
+        saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+
+        % CoV common voxels
+        exp = 'i1.*i2';
+        input = {outputCoV; outputMaskT1map}; % i1, i2
+        outDir = fullfile(opt.dir.output, ['sub-' subLabel]);
+
+        outputCommon = fullfile(opt.dir.output, ['sub-' subLabel], ['sub-' subLabel '_acq-' opt.acq '_covCommonVoxSes' opt.ses 'Ses' opt.ses2 '_T1map.nii']);
+        matlabbatch = {};
+        matlabbatch = setBatchImageCalculation(matlabbatch, opt, input, outputCommon, outDir, exp, 'float32');
+        matlabbatch{1}.spm.util.imcalc.options.interp = 0;
+
+        batchName = 'CoV-CommonVoxelsT1map';
+        saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+
     end
-
-    % UNIT1 stats
-    field = fieldnames(CovRoiUNIT1);
-    meanCovRoiUNIT1 = structfun(@mean, CovRoiUNIT1, 'uniform', 0);
-    stdsUNIT1 = structfun(@std, CovRoiUNIT1, 'uniform', 0);
-    nVoxelsUNIT1 = structfun(@numel, CovRoiUNIT1);
-    minROIUNIT1 = structfun(@min, CovRoiUNIT1, 'uniform', 0);
-    maxROIUNIT1 = structfun(@max, CovRoiUNIT1, 'uniform', 0);
-    medianROIUNIT1 = structfun(@median, CovRoiUNIT1, 'uniform', 0);
-
-    MeanCovUNIT1 = struct2cell(meanCovRoiUNIT1);
-    StdCovUNIT1 = struct2cell(stdsUNIT1);
-    MinUNIT1 = cell2mat(struct2cell(minROIUNIT1));
-    MaxUNIT1 = cell2mat(struct2cell(maxROIUNIT1));
-    medianCovUNIT1 = cell2mat(struct2cell(medianROIUNIT1));
-
-    CovStatsUNIT1 = table(field, MeanCovUNIT1, medianCovUNIT1, StdCovUNIT1, nVoxelsUNIT1, MinUNIT1, MaxUNIT1);
-
-    outputNameCovStatsUNIT1 = ['sub-' subLabel ...
-                               '_acq-r0p75_desc-CovStatsROIs_UNIT1.tsv'];
-
-    fileNameCovStatsUNIT1 = fullfile(opt.dir.output, ['sub-' subLabel], outputNameCovStatsUNIT1);
-    bids.util.tsvwrite(fileNameCovStatsUNIT1, CovStatsUNIT1);
-
-    % T1 map
-    meanCovRoiT1map = structfun(@mean, CovRoiT1map, 'uniform', 0);
-    stdsT1map = structfun(@std, CovRoiT1map, 'uniform', 0);
-    nVoxelsT1map = structfun(@numel, CovRoiT1map);
-    minROIT1map = structfun(@min, CovRoiT1map, 'uniform', 0);
-    maxROIT1map = structfun(@max, CovRoiT1map, 'uniform', 0);
-    medianROIT1map = structfun(@median, CovRoiT1map, 'uniform', 0);
-
-    MeanCovT1map = struct2cell(meanCovRoiT1map);
-    StdCovT1map = struct2cell(stdsT1map);
-    MinT1map = cell2mat(struct2cell(minROIT1map));
-    MaxT1map = cell2mat(struct2cell(maxROIT1map));
-    medianCovT1map = cell2mat(struct2cell(medianROIT1map));
-
-    CovStatsT1map = table(field, MeanCovT1map, medianCovT1map, StdCovT1map, nVoxelsT1map, MinT1map, MaxT1map);
-
-    outputNameCovStatsT1map = ['sub-' subLabel ...
-                               '_acq-r0p75_desc-CovStatsROIs_T1map.tsv'];
-
-    fileNameCovStatsT1map = fullfile(opt.dir.output, ['sub-' subLabel], outputNameCovStatsT1map);
-    bids.util.tsvwrite(fileNameCovStatsT1map, CovStatsT1map);
-
 end

@@ -1,83 +1,77 @@
-clear;
-clc;
+function ExtractT1Layers(opt)
 
-run ../initEnv();
-addpath(fullfile(pwd, '..'));
-opt = get_option_rois();
+    BIDS = bids.layout(opt.dir.roi, 'use_schema', false);
+    rois = opt.roi.name;
 
-opt.dir.roi = opt.dir.output;
+    for subIdx = 1:numel(opt.subjects)
 
-BIDS = bids.layout(opt.dir.roi, 'use_schema', false);
-rois = {'pFus', 'CoS', 'mFus', 'V1v', 'V1d'};
+        %% get list of layers files
 
-for subIdx = 1:numel(opt.subjects)
+        subLabel = opt.subjects{subIdx};
+        fprintf('subject number: %d\n', subIdx);
 
-    %% get list of layers files
+        hemispheres = {'R', 'L'};
 
-    subLabel = opt.subjects{subIdx};
-    fprintf('subject number: %d\n', subIdx);
+        clear filter;
 
-    hemispheres = {'R', 'L'};
+        %% get the T1 map
+        filter.sub = subLabel;
+        filter.suffix = 'T1map';
+        filter.acq = opt.acq;
+        filter.desc = 'skullstripped';
 
-    clear filter;
+        T1map = bids.query(BIDS, 'data', filter);
+        assert(numel(T1map) == 1);
+        T1map = T1map{1};
 
-    % get the T1 map
-    filter.sub = subLabel;
-    filter.suffix = 'T1map';
-    filter.acq = 'r0p375';
-    filter.desc = 'skullstripped';
+        clear filter;
 
-    T1map = bids.query(BIDS, 'data', filter);
-    T1map = T1map{1};
+        for roisIdx = 1:numel(rois)
 
-    acq = filter.acq;
-    clear filter;
+            for hemisIdx = 1:numel(hemispheres)
 
-    for roisIdx = 1:numel(rois)
+                nlayers = string(1:6);
+                filter.label = strcat(rois(roisIdx), 'layer', nlayers);
+                filter.desc = '6layers';
+                filter.sub = subLabel;
+                filter.hemi = hemispheres{hemisIdx};
+                filter.modality = 'roi';
+                filter.suffix = 'mask';
+                filter.prefix = '';
 
-        for hemisIdx = 1:numel(hemispheres)
+                listoflayers = bids.query(BIDS, 'data', filter);
 
-            nlayers = string(1:6);
-            filter.label = strcat(rois(roisIdx), 'layer', nlayers);
-            filter.desc = '6layers';
-            filter.sub = subLabel;
-            filter.hemi = hemispheres{hemisIdx};
-            filter.modality = 'roi';
-            filter.suffix = 'mask';
-            filter.prefix = 'r';
+                T1relax = struct();
 
-            listoflayers = bids.query(BIDS, 'data', filter);
+                clear filter;
+                numVoxPerLayer = zeros(1, numel(listoflayers));
 
-            T1relax = struct();
+                for layerIdx = 1:numel(listoflayers)
 
-            clear filter;
-            numVoxPerLayer = zeros(1, numel(listoflayers));
+                    fprintf('\nWorking on layer: %s\n', num2str(layerIdx));
 
-            for layerIdx = 1:numel(listoflayers)
+                    T1relax.(sprintf('layer_%d', layerIdx)) = spm_summarise(T1map, listoflayers{layerIdx});
 
-                fprintf('\nWorking on layer: %s\n', num2str(layerIdx));
+                    numVoxPerLayer(layerIdx) = size(T1relax.(sprintf('layer_%d', layerIdx)), 2);
 
-                T1relax.(sprintf('layer_%d', layerIdx)) = spm_summarise(T1map, listoflayers{layerIdx});
+                end
 
-                numVoxPerLayer(layerIdx) = size(T1relax.(sprintf('layer_%d', layerIdx)), 2);
+                maxNbVoxel = max(numVoxPerLayer);
 
+                for layerIdx = 1:numel(listoflayers)
+
+                    T1relax.(sprintf('layer_%d', layerIdx)) = [T1relax.(sprintf('layer_%d', layerIdx)) ...
+                                                               nan(1, maxNbVoxel - numVoxPerLayer(layerIdx))];
+
+                end
+
+                outputName = ['sub-' subLabel ...
+                              '_ses-' opt.ses '_acq-' opt.acq '_hemi-' hemispheres{hemisIdx} '_label-' char(rois(roisIdx)) '_desc-T1relaxation.tsv'];
+
+                fileName = fullfile(opt.dir.output, ['sub-' subLabel], ['ses-' opt.ses], 'anat', outputName);
+
+                bids.util.tsvwrite(fileName, T1relax);
             end
-
-            maxNbVoxel = max(numVoxPerLayer);
-
-            for layerIdx = 1:numel(listoflayers)
-
-                T1relax.(sprintf('layer_%d', layerIdx)) = [T1relax.(sprintf('layer_%d', layerIdx)) ...
-                                                           nan(1, maxNbVoxel - numVoxPerLayer(layerIdx))];
-
-            end
-
-            outputName = ['sub-' subLabel ...
-                          '_ses-001_acq-' acq '_hemi-' hemispheres{hemisIdx} '_label-' char(rois(roisIdx)) '_desc-T1relaxation.tsv'];
-
-            fileName = fullfile(opt.dir.output, ['sub-' subLabel], 'ses-001', 'anat', outputName);
-
-            bids.util.tsvwrite(fileName, T1relax);
         end
     end
 end

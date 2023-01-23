@@ -1,93 +1,117 @@
-clear;
-clc;
+function CoregResliceses002UNIT1andT1map(opt)
 
-addpath(fullfile(pwd, '..'));
-initEnv();
+    BIDS = bids.layout(opt.dir.output, ...
+                       'use_schema', false);
 
-addpath(fullfile(pwd, '../calcSNR'));
-opt = get_option_preproc();
+    for subIdx = 1:numel(opt.subjects)
+        subLabel = opt.subjects{subIdx};
+        fprintf('subject number: %d\n', subIdx);
 
-opt.dir.roi = opt.dir.output;
+        %% find UNIT1 2 sessions
+        filter.sub = subLabel;
+        filter.ses = opt.ses;
+        filter.modality = 'anat';
+        filter.acq = opt.acq;
+        filter.suffix = 'UNIT1';
+        filter.prefix = '';
+        filter.desc = 'intercBrainMask';
 
-BIDS = bids.layout(opt.dir.roi, ...
-                   'use_schema', false);
+        UNIT1_001 = bids.query(BIDS, 'data', filter);
+        assert(numel(UNIT1_001) == 1);
+        UNIT1_001 = UNIT1_001{:};
 
-for subIdx = 1:numel(opt.subjects)
-    subLabel = opt.subjects{subIdx};
-    fprintf('subject number: %d\n', subIdx);
-    % find UNIT1 sess 001 and 002
-    filters.sub = subLabel;
-    filters.ses = '001';
-    filters.modality = 'anat';
-    filters.acq = 'r0p75';
-    filters.suffix = 'UNIT1';
-    filters.prefix = '';
-    filters.desc = 'intercBrainMask';
+        filter.ses = opt.ses2;
+        filter.prefix = '';
 
-    sub1stSesUNIT1 = bids.query(BIDS, 'data', filters);
-    sub1stSesUNIT1 = sub1stSesUNIT1{1};
+        UNIT1_002 = bids.query(BIDS, 'data', filter);
+        assert(numel(UNIT1_002) == 1);
+        UNIT1_002 = UNIT1_002{:};
 
-    filters.ses = '002';
-    filters.prefix = '';
+        %% find T1 map 2 sessions
+        filter.sub = subLabel;
+        filter.acq = opt.acq;
+        filter.ses = opt.ses;
+        filter.suffix = 'T1map';
+        filter.desc = 'skullstripped';
+        filter.space = '';
+        filter.prefix = '';
 
-    sub2stSesUNIT1 = bids.query(BIDS, 'data', filters);
-    sub2stSesUNIT1 = sub2stSesUNIT1{1};
+        T1map_001 = bids.query(BIDS, 'data', filter);
+        assert(numel(T1map_001) == 1);
+        T1map_001 = T1map_001{:};
 
-    % find T1 map 001 and 002 sessions
-    filter.sub = subLabel;
-    filter.acq = 'r0p75';
-    filter.ses = '001';
-    filter.suffix = 'T1map';
-    filter.desc = 'skullstripped';
-    filter.space = '';
-    filter.prefix = '';
+        filter.ses = opt.ses2;
 
-    T1map_001 = bids.query(BIDS, 'data', filter);
-    T1map_001 = T1map_001{1};
+        T1map_002 = bids.query(BIDS, 'data', filter);
+        assert(numel(T1map_002) == 1);
+        T1map_002 = T1map_002{:};
 
-    filter.ses = '002'; % change for other sessions
+        clear filter;
 
-    filter.ses = '002'; % change for other sessions
+        %% find brain masks UNIT1 2 sessions
+        filter.sub = subLabel;
+        filter.ses = opt.ses;
+        filter.space = 'individual';
+        filter.acq = opt.acq;
+        filter.suffix = 'mask';
+        brainmaskUNIT1_001 = bids.query(BIDS, 'data', filter);
+        assert(numel(brainmaskUNIT1_001) == 1);
+        brainmaskUNIT1_001 = brainmaskUNIT1_001{:};
 
-    T1map_002 = bids.query(BIDS, 'data', filter);
-    T1map_002 = T1map_002{1};
-    clear filter;
+        filter.ses = opt.ses2;
 
-    % find brain masks 001 and 002 sessions
-    filter.sub = subLabel;
-    filter.ses = '001';
-    filter.space = 'individual';
-    filter.acq = 'r0p75'; % change depending on the pipeline
-    filter.suffix = 'mask';
-    brainmask_001 = bids.query(BIDS, 'data', filter);
-    brainmask_001 = brainmask_001{:}; % because it complains: 'Struct contents reference from a non-struct array object.'
+        brainmaskUNIT1_002 = bids.query(BIDS, 'data', filter);
+        assert(numel(brainmaskUNIT1_002) == 1);
+        brainmaskUNIT1_002 = brainmaskUNIT1_002{:};
 
-    filter.ses = '002';
+        clear filter;
 
-    brainmask_002 = bids.query(BIDS, 'data', filter);
-    brainmask_002 = brainmask_002{:}; % because it complains: 'Struct contents reference from a non-struct array object.'
+        %% find T1 map binary masks 2 sessions
 
-    clear filter;
+        filter.sub = subLabel;
+        filter.ses = opt.ses;
+        filter.acq = opt.acq;
+        filter.suffix = 'T1map';
+        filter.desc = 'brainmask';
 
-    %% coregistration UNIT1s
-    matlabbatch = {};
-    matlabbatch = setBatchCoregistration(matlabbatch, opt, sub1stSesUNIT1, sub2stSesUNIT1);
+        brainmaskT1map_001 = bids.query(BIDS, 'data', filter);
+        assert(numel(brainmaskT1map_001) == 1);
+        brainmaskT1map_001 = brainmaskT1map_001{:};
 
-    batchName = 'coregister_Ses001_ses002_UNIT1';
-    saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+        filter.ses = opt.ses2;
 
-    %% coregistration T1 maps
-    matlabbatch = {};
-    matlabbatch = setBatchCoregistration(matlabbatch, opt, T1map_001, T1map_002);
+        brainmaskT1map_002 = bids.query(BIDS, 'data', filter);
+        assert(numel(brainmaskT1map_002) == 1);
+        brainmaskT1map_002 = brainmaskT1map_002{:};
 
-    batchName = 'coregister_Ses001_ses002_T1map';
-    saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+        clear filter;
+        %% coregistration UNIT1s
+        matlabbatch = {};
+        matlabbatch = setBatchCoregistration(matlabbatch, opt, UNIT1_001, UNIT1_002);
 
-    %% coregistration brain masks
-    matlabbatch = {};
-    matlabbatch = setBatchCoregistration(matlabbatch, opt, brainmask_001, brainmask_002);
+        batchName = ['coregister_Ses' opt.ses '_ses' opt.ses2 '_UNIT1'];
+        saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
 
-    batchName = 'coregister_Ses001_ses002_brainmasks';
-    saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+        %% coregistration T1 maps
+        matlabbatch = {};
+        matlabbatch = setBatchCoregistration(matlabbatch, opt, T1map_001, T1map_002);
 
+        batchName = ['coregister_Ses' opt.ses '_ses' opt.ses2 '_T1map'];
+        saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+
+        %% coregistration brain masks UNIT1
+        matlabbatch = {};
+        matlabbatch = setBatchCoregistration(matlabbatch, opt, brainmaskUNIT1_001, brainmaskUNIT1_002);
+
+        batchName = ['coregister_Ses' opt.ses '_ses' opt.ses2 '_brainmasksUNIT1'];
+        saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+
+        %% coregistration brain masks T1 map
+        matlabbatch = {};
+        matlabbatch = setBatchCoregistration(matlabbatch, opt, brainmaskT1map_001, brainmaskT1map_002);
+
+        batchName = ['coregister_Ses' opt.ses '_ses' opt.ses2 '_brainmasksT1map'];
+        saveAndRunWorkflow(matlabbatch, batchName, opt, subLabel);
+
+    end
 end
