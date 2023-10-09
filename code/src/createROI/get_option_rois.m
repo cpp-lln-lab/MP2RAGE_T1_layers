@@ -1,7 +1,7 @@
 function opt = get_option_rois()
     % returns a structure that contains the options chosen by the user ...
-    ... to run the workflows that extract T1 laminar profile in occipital- ...
-      % temporal regions
+    % to run the workflows that extract T1 laminar profile in occipital- ...
+    % temporal regions
     if nargin < 1
         opt = [];
     end
